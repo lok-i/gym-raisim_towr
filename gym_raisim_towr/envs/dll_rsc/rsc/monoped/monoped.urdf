@@ -1,0 +1,160 @@
+<robot name="monoped">
+    <link name="base">
+        <inertial>
+         <origin xyz ="0 0 0" rpy="0 0 0"/>
+         <mass value="20"/>
+         <inertia
+           ixx="1.2"
+           iyy="5.5"
+           izz="6.0"
+           ixy="0.0"
+           ixz="-0.2"
+           iyz="-0.01" />
+                   
+        </inertial>
+
+
+        <visual>
+          <origin xyz ="0 0 0" rpy="0 0 0"/>
+	      <geometry>
+	        <box size="0.20 0.20 0.30"/>
+	      </geometry>
+	      <material name="blue">
+	        <color rgba="0.3 0.3 0.3 1.0"/>
+	      </material>
+	    </visual>  
+
+
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.20 0.20 0.30"/>
+            </geometry>
+        </collision> 
+   
+    </link>
+    
+    <link name="hipassembly">
+
+        <inertial>
+            <origin xyz ="0 0 0" rpy="0 0 0"/>
+            <mass value="0.02"/>
+            <inertia
+            ixx="0.0002835"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="0.0002835"
+            iyz="0.0"
+            izz="0.000324" />
+        </inertial>
+
+        <collision>
+          <origin
+            xyz="0 0 0"
+            rpy="1.57 0 0" />
+          <geometry>
+            <mesh
+              filename="hipassembly.obj" />
+          </geometry>
+        </collision>
+
+	    <visual>
+	      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+	      <geometry>
+	        <mesh filename="hipassembly.dae" scale="1 1 1"/>
+	      </geometry>
+	      <material name="white"/>
+	    </visual>
+
+        </link>
+
+
+
+
+
+
+
+    <link name="upperleg">
+
+        <inertial>
+            <origin xyz ="0 0 0" rpy="0 0 0"/>
+            <mass value="0.02"/>
+            <inertia
+            ixx="0.0002835"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="0.0002835"
+            iyz="0.0"
+            izz="0.000324" />
+        </inertial>
+        <collision>
+            <origin xyz="0.22 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.33 0.05 0.05"/>
+            </geometry>
+        </collision>
+
+	    <visual>
+	      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+	      <geometry>
+	        <mesh filename="upperleg.dae" scale="1 1 1"/>
+	      </geometry>
+	      <material name="blue"/>
+	    </visual>
+    
+        </link>
+
+    <link name="lowerleg">
+	    
+        <inertial>
+            <origin xyz ="0 0 0" rpy="0 0 0"/>
+            <mass value="0.02"/>
+            <inertia
+            ixx="0.0002835"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="0.0002835"
+            iyz="0.0"
+            izz="0.000324" />
+        </inertial>
+
+      <collision>
+            <origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+            <geometry>
+            <!--    <box size="0.27 0.04 0.04"/> -->
+                <cylinder length="0.315" radius="0.015"/>
+            </geometry>
+        </collision>
+
+        <visual>
+	      <geometry>
+	        <mesh filename="lowerleg.dae" scale="1 1 1"/>
+	      </geometry>
+	      <material name="blue"/>
+	    </visual>        
+    </link>
+    
+    <joint name="haa_joint" type="revolute">
+        <origin xyz="0.0 0.0 -0.15000" rpy="2.0344439357957036 1.5707962290814481 -1.1071487177940917"/>
+        <parent link="base"/>
+        <child  link="hipassembly"/>
+        <limit effort="200" lower="-1.6" upper="1.6" velocity="1.0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+    <joint name="hfe_joint" type="revolute">
+        <origin xyz="0.08000 0.00000 0.00000" rpy="1.5707963705062866 -0.0 0.0"/>
+        <parent link="hipassembly"/>
+        <child  link="upperleg"/>
+        <limit effort="200" lower="-1.6" upper="1.6" velocity="1.0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+    <joint name="kfe_joint" type="revolute">
+        <origin xyz="0.35000 0.00000 0.00000" rpy="0.0 0.0 0.0"/>
+        <parent link="upperleg"/>
+        <child  link="lowerleg"/>
+        <limit effort="200" lower="-1.6" upper="1.6" velocity="1.0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+</robot>
+
