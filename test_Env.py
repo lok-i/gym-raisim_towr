@@ -3,9 +3,13 @@ import gym
 
 from time import sleep
 
-env = gym.make('gym_raisim_towr:raisim_towr-v0',render=True)
+
+target = [1,1,0.54]
+env = gym.make('gym_raisim_towr:raisim_towr-v0',render=True,base_linear_target=target,no_of_steps=5,base_init_height = 1)
 #observation = 
 env.reset()
+
+env.print_towr_traj()
 
 print('action',env.action_space)
 print('state',env.observation_space)

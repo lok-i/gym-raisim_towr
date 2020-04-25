@@ -220,6 +220,9 @@ raisim_towr_SOURCE_DIR:STATIC=/home/lok/RBCCPS_projects/gym-raisim_towr/gym_rais
 //The directory containing a CMake configuration file for towr.
 towr_DIR:PATH=/usr/local/share/towr/cmake
 
+//Dependencies for the target
+towr_dll_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython2.7.so;general;raisim::raisimOgre;general;ifopt::ifopt_ipopt;general;towr::towr;
+
 
 ########################
 # INTERNAL cache entries

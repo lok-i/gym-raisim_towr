@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o"
+  "CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o"
   "libraisim_dll.pdb"
   "libraisim_dll.so"
 )

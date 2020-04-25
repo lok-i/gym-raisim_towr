@@ -123,32 +123,72 @@ raisim_dll/fast:
 	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/build
 .PHONY : raisim_dll/fast
 
-raisim_towr_lib.o: raisim_towr_lib.cpp.o
+#=============================================================================
+# Target rules for targets named towr_dll
 
-.PHONY : raisim_towr_lib.o
+# Build rule for target.
+towr_dll: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 towr_dll
+.PHONY : towr_dll
+
+# fast build rule for target.
+towr_dll/fast:
+	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/build
+.PHONY : towr_dll/fast
+
+raisim_dll.o: raisim_dll.cpp.o
+
+.PHONY : raisim_dll.o
 
 # target to build an object file
-raisim_towr_lib.cpp.o:
-	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o
-.PHONY : raisim_towr_lib.cpp.o
+raisim_dll.cpp.o:
+	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o
+.PHONY : raisim_dll.cpp.o
 
-raisim_towr_lib.i: raisim_towr_lib.cpp.i
+raisim_dll.i: raisim_dll.cpp.i
 
-.PHONY : raisim_towr_lib.i
+.PHONY : raisim_dll.i
 
 # target to preprocess a source file
-raisim_towr_lib.cpp.i:
-	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.i
-.PHONY : raisim_towr_lib.cpp.i
+raisim_dll.cpp.i:
+	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_dll.cpp.i
+.PHONY : raisim_dll.cpp.i
 
-raisim_towr_lib.s: raisim_towr_lib.cpp.s
+raisim_dll.s: raisim_dll.cpp.s
 
-.PHONY : raisim_towr_lib.s
+.PHONY : raisim_dll.s
 
 # target to generate assembly for a file
-raisim_towr_lib.cpp.s:
-	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.s
-.PHONY : raisim_towr_lib.cpp.s
+raisim_dll.cpp.s:
+	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_dll.cpp.s
+.PHONY : raisim_dll.cpp.s
+
+towr_dll.o: towr_dll.cpp.o
+
+.PHONY : towr_dll.o
+
+# target to build an object file
+towr_dll.cpp.o:
+	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/towr_dll.cpp.o
+.PHONY : towr_dll.cpp.o
+
+towr_dll.i: towr_dll.cpp.i
+
+.PHONY : towr_dll.i
+
+# target to preprocess a source file
+towr_dll.cpp.i:
+	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/towr_dll.cpp.i
+.PHONY : towr_dll.cpp.i
+
+towr_dll.s: towr_dll.cpp.s
+
+.PHONY : towr_dll.s
+
+# target to generate assembly for a file
+towr_dll.cpp.s:
+	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/towr_dll.cpp.s
+.PHONY : towr_dll.cpp.s
 
 # Help Target
 help:
@@ -157,11 +197,15 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... raisim_dll"
 	@echo "... edit_cache"
-	@echo "... raisim_towr_lib.o"
-	@echo "... raisim_towr_lib.i"
-	@echo "... raisim_towr_lib.s"
+	@echo "... raisim_dll"
+	@echo "... towr_dll"
+	@echo "... raisim_dll.o"
+	@echo "... raisim_dll.i"
+	@echo "... raisim_dll.s"
+	@echo "... towr_dll.o"
+	@echo "... towr_dll.i"
+	@echo "... towr_dll.s"
 .PHONY : help
 
 

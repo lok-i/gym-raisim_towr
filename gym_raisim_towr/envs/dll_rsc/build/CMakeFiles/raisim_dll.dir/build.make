@@ -57,38 +57,38 @@ include CMakeFiles/raisim_dll.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/raisim_dll.dir/flags.make
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o: CMakeFiles/raisim_dll.dir/flags.make
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o: ../raisim_towr_lib.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o -c /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_towr_lib.cpp
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o: CMakeFiles/raisim_dll.dir/flags.make
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o: ../raisim_dll.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o -c /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_dll.cpp
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_towr_lib.cpp > CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.i
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/raisim_dll.dir/raisim_dll.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_dll.cpp > CMakeFiles/raisim_dll.dir/raisim_dll.cpp.i
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_towr_lib.cpp -o CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.s
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/raisim_dll.dir/raisim_dll.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lok/RBCCPS_projects/gym-raisim_towr/gym_raisim_towr/envs/dll_rsc/raisim_dll.cpp -o CMakeFiles/raisim_dll.dir/raisim_dll.cpp.s
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.requires:
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.requires:
 
-.PHONY : CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.requires
+.PHONY : CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.requires
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.provides: CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.requires
-	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.provides.build
-.PHONY : CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.provides
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.provides: CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.requires
+	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.provides.build
+.PHONY : CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.provides
 
-CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.provides.build: CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o
+CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.provides.build: CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o
 
 
 # Object files for target raisim_dll
 raisim_dll_OBJECTS = \
-"CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o"
+"CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o"
 
 # External object files for target raisim_dll
 raisim_dll_EXTERNAL_OBJECTS =
 
-libraisim_dll.so: CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o
+libraisim_dll.so: CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o
 libraisim_dll.so: CMakeFiles/raisim_dll.dir/build.make
 libraisim_dll.so: /usr/lib/x86_64-linux-gnu/libpython2.7.so
 libraisim_dll.so: /home/lok/Raisim/raisim_build/lib/libraisimOgre.so
@@ -115,7 +115,7 @@ CMakeFiles/raisim_dll.dir/build: libraisim_dll.so
 
 .PHONY : CMakeFiles/raisim_dll.dir/build
 
-CMakeFiles/raisim_dll.dir/requires: CMakeFiles/raisim_dll.dir/raisim_towr_lib.cpp.o.requires
+CMakeFiles/raisim_dll.dir/requires: CMakeFiles/raisim_dll.dir/raisim_dll.cpp.o.requires
 
 .PHONY : CMakeFiles/raisim_dll.dir/requires
 
