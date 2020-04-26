@@ -8,6 +8,14 @@ import random
 
 cwd_path = os.getcwd()
 
+def euler_to_quaternion(r):
+    (roll, pitch, yaw) = (r[0], r[1], r[2])
+    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    return [ qw, qx, qy, qz]
+
 class Trajectory_data(Structure):
     _fields_ = [
             ('base_linear', c_float*3),
@@ -27,12 +35,13 @@ class Raisim_towrEnv(gym.Env):
     self.base_init_height = base_init_height
 
     self.action_space = spaces.Box(low=-1.57, high=1.57,shape=(3,))
-    self.observation_space = spaces.Box(low=-2, high=2, shape=(6,))
+    self.observation_space = spaces.Box(low=-2, high=2, shape=(16,))
     
     self.c_Float_3 = c_float*3
     self.traj_array = Trajectory_data*(self.no_of_steps+1)
     
     self.towr_traj = self.traj_array()
+    self.current_raisim_state = (c_float*16)()
     self.base_linear_target = self.c_Float_3()
     for i in range(3):
       self.base_linear_target[i] = base_linear_target[i]
@@ -56,6 +65,8 @@ class Raisim_towrEnv(gym.Env):
     self.raisim_dll._init_monopend.argtypes = [c_float]
     self.raisim_dll._init_ViSsetup.restype = None
     self.raisim_dll._init_ViSsetup.argtypes = [c_bool]
+    self.raisim_dll.get_state.restype = None
+    self.raisim_dll.get_state.argtype = [c_float*16]
 
 
 
@@ -76,22 +87,65 @@ class Raisim_towrEnv(gym.Env):
 
 
 
-  def step(self, action):
-  	
-  	target_angle = self.c_Float_3()
-  	for i in range(3):
-  		target_angle[i] = action[i]
-  	self.raisim_dll._sim(target_angle,self.render_status)
+  def step(self, action ,ith_step):
+    done = False
+
+    target_angle = self.c_Float_3()
+    for i in range(3):
+      target_angle[i] = action[i]
+    self.raisim_dll._sim(target_angle,self.render_status)
+    self.raisim_dll.get_state(self.current_raisim_state)
+    if ith_step ==self.no_of_steps:
+      done = True
+    return np.array(self.current_raisim_state),self.calc_reward(ith_step),done,{}
+
     
   def reset(self):
     b_h = c_float(self.base_init_height)
     print('reset')
     self.raisim_dll._rst(b_h)
     
-  #def render(self, mode='human'):
+  def calc_reward(self, ith_step):
+    #only base pose and orientation is considered
+
+    w_base_pos_quat = 0.15
+    towr_pose = np.array(self.towr_traj[ith_step].base_linear)
+    towr_quat = np.array(euler_to_quaternion(self.towr_traj[ith_step].base_angular)) 
     
+    raisim_pose = np.array([self.current_raisim_state[0],self.current_raisim_state[1],self.current_raisim_state[2]])
+    raisim_quat = np.array([self.current_raisim_state[3],self.current_raisim_state[4],self.current_raisim_state[5],self.current_raisim_state[6]])
+    
+    pose_diff_mse = np.mean(np.square(np.subtract(towr_pose,raisim_pose)))
+    quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
+  
+    reward =w_base_pos_quat*np.exp(-20*pose_diff_mse + -10*quat_diff_mse)
+
+    return reward
+    # print("towr_pose_:",towr_pose,'\n')
+    # print("towr_quat_:",towr_quat,'\n')
+
+    # print("raisim_pose_:",raisim_pose,'\n')
+    # print("raisim_quat_:",raisim_quat,'\n')
+    # print("reward_:",reward)
+
+    
+
+
   def close(self):
     print("close")
     self.raisim_dll._close();
+
     
 
+
+
+
+
+    ''' 
+    r(t) = w_base_pos * r_base_pos(t) + 
+         w_base_lin_vel * r_base_lin_vel(t) + 
+         w_end_eff_co *  r_end_eff_co(t) + 
+         w_base_rpy *r_base_rpy(t) +
+         w_base_angulat_vel * r_base_angulat_vel
+      
+    '''

@@ -198,6 +198,59 @@ void _close()
 }
 
 
+extern "C"{
+
+
+void get_state(float* state)
+
+{
+
+// raisim::Vec<3> point_W;
+// monoped->getFramePosition(0,point_W);
+// std::cout<<"\n\n"<<"Root frame position\n";
+
+// for(int i=0;i<3;i++)
+//   std::cout<<point_W[i]<<"\t";
+
+// raisim::Mat<3, 3> orientation_W;
+// monoped->getFrameOrientation(0,orientation_W);
+// std::cout<<"\n\n"<<"Root frame orientation\n";
+// for(int i =0;i<3;i++)
+//   {std::cout<<"\n";
+//    for(int j=0;j<3;j++)
+//       std::cout<<orientation_W(i,j)<<"\t";
+
+//   }
+
+
+
+raisim::VecDyn GenCo(monoped->getGeneralizedCoordinate());
+raisim::VecDyn GenW(monoped->getGeneralizedVelocity());
+raisim::VecDyn GenT(monoped->getGeneralizedForce());
+
+
+/*
+std::cout<<"\n\n"<<"GenCo\n"<<GenCo;
+std::cout<<"\n\n"<<"GenW\n"<<GenW;
+std::cout<<"\n\n"<<"GenT\n"<<GenT;
+std::cout<<"\n\n";
+*/
+
+for (int i =0;i<10;i++)
+*(state+i) = GenCo.v[i];
+for (int i =0;i<3;i++)
+*(state+i+10) = GenW.v[i+6];
+for (int i =0;i<3;i++)
+*(state+i+13) = GenT.v[i+6];
+
+
+
+}
+
+
+}
+
+
 
 extern "C"
 {
