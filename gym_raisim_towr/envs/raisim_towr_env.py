@@ -30,12 +30,13 @@ class Raisim_towrEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self,base_linear_target,base_init_height = 0.54,render=True,no_of_steps=20,gravity=True):
-    self.no_of_steps = no_of_steps # also the no of sampled from towr initially
+    self.no_of_steps = no_of_steps # also the no of sampled from towr initially == no of steps per episode
     self.render_status = render
     self.base_init_height = base_init_height
 
     self.action_space = spaces.Box(low=-1.57, high=1.57,shape=(3,))
     self.observation_space = spaces.Box(low=-2, high=2, shape=(16,))
+    self.ith_step = 0
     
     self.c_Float_3 = c_float*3
     self.traj_array = Trajectory_data*(self.no_of_steps+1)
@@ -87,23 +88,31 @@ class Raisim_towrEnv(gym.Env):
 
 
 
-  def step(self, action ,ith_step):
+  def step(self, action):
     done = False
-
+    self.ith_step +=1
     target_angle = self.c_Float_3()
     for i in range(3):
       target_angle[i] = action[i]
+      #print('target[i]',target_angle[i])  
     self.raisim_dll._sim(target_angle,self.render_status)
     self.raisim_dll.get_state(self.current_raisim_state)
-    if ith_step ==self.no_of_steps:
+    if self.ith_step ==self.no_of_steps:
       done = True
-    return np.array(self.current_raisim_state),self.calc_reward(ith_step),done,{}
+    return np.array(self.current_raisim_state),self.calc_reward(self.ith_step),done,{}
 
     
   def reset(self):
     b_h = c_float(self.base_init_height)
     print('reset')
+    self.ith_step = 0
+
+
     self.raisim_dll._rst(b_h)
+    if(self.render_status):
+      self.render()
+    state,r,d,_ = self.step([0,1.09542,-2.3269]) 
+    return state
     
   def calc_reward(self, ith_step):
     #only base pose and orientation is considered
@@ -120,23 +129,21 @@ class Raisim_towrEnv(gym.Env):
   
     reward =w_base_pos_quat*np.exp(-20*pose_diff_mse + -10*quat_diff_mse)
 
-    return reward
-    # print("towr_pose_:",towr_pose,'\n')
-    # print("towr_quat_:",towr_quat,'\n')
-
-    # print("raisim_pose_:",raisim_pose,'\n')
-    # print("raisim_quat_:",raisim_quat,'\n')
+    # print("\n\ntowr_pose_:",towr_pose,'\t',"raisim_pose_:",raisim_pose,'\n')
+    # print("towr_quat_:",towr_quat,'\t',"raisim_quat_:",raisim_quat,'\n')
+    # print("pose_mse_:",pose_diff_mse,'\t',"quat_mse_:",quat_diff_mse,"\n")
     # print("reward_:",reward)
 
-    
+    return reward
 
 
   def close(self):
     print("close")
-    self.raisim_dll._close();
+    self.raisim_dll._close()
 
     
-
+  def render(self):
+    self.raisim_dll._render()
 
 
 

@@ -254,6 +254,24 @@ for (int i =0;i<3;i++)
 
 extern "C"
 {
+void _render()
+{
+auto vis = raisim::OgreVis::get();
+vis->renderOneFrame();
+
+}
+
+
+
+
+
+}
+
+
+
+
+extern "C"
+{
 void _sim(float angles[3],bool render = true) 
 {
 
