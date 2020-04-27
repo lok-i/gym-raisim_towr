@@ -35,6 +35,8 @@ class Raisim_towrEnv(gym.Env):
     self.base_init_height = base_init_height
 
     self.action_space = spaces.Box(low=-1.57, high=1.57,shape=(3,))
+
+    #cant set low , high as the diff of position is present
     self.observation_space = spaces.Box(low=-2, high=2, shape=(16,))
     self.ith_step = 0
     
@@ -94,9 +96,17 @@ class Raisim_towrEnv(gym.Env):
     target_angle = self.c_Float_3()
     for i in range(3):
       target_angle[i] = action[i]
-      #print('target[i]',target_angle[i])  
+    #target angle _ pd targets   
     self.raisim_dll._sim(target_angle,self.render_status)
     self.raisim_dll.get_state(self.current_raisim_state)
+    
+    # goal - curren base position
+    for i in range(3):
+      self.current_raisim_state[i] = self.towr_traj[self.ith_step].base_linear[i] - self.current_raisim_state[i]
+
+    '''
+    State:-{goal_base_pos[3] - base_pos[3],base_quat[4],genralized_joint_angles[3],genralized_joint_velocities[3],genralized_joint_forces[3]}
+    '''
     if self.ith_step ==self.no_of_steps:
       done = True
     return np.array(self.current_raisim_state),self.calc_reward(self.ith_step),done,{}
@@ -111,7 +121,7 @@ class Raisim_towrEnv(gym.Env):
     self.raisim_dll._rst(b_h)
     if(self.render_status):
       self.render()
-    state,r,d,_ = self.step([0,1.09542,-2.3269]) 
+    state,r,d,_ = self.step([0,1.09542,-2.3269])#base position angles
     return state
     
   def calc_reward(self, ith_step):

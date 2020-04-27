@@ -22,7 +22,7 @@ no_of_steps_per_epi = 200
 target = [1,1,0.54]
 env = gym.make('gym_raisim_towr:raisim_towr-v0',render=True,base_linear_target=target,no_of_steps=no_of_steps_per_epi,base_init_height = 0.54)
 
-agent_name = 'test-('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')'
+agent_name = 'state_final_test-('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')'
 
 #function to print traj calcuated by towr
 #env.print_towr_traj()
