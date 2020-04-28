@@ -10,7 +10,7 @@ cwd = os.getcwd()
 no_of_episodes = 700
 no_of_steps_per_epi = 200
 
-agent_name = 'state_final_test-('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')'
+agent_name = 'state_final_test-('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')[ith_step frm -1]'
 
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position

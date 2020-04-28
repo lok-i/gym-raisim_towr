@@ -38,7 +38,7 @@ class Raisim_towrEnv(gym.Env):
 
     #cant set low , high as the diff of position is present
     self.observation_space = spaces.Box(low=-2, high=2, shape=(16,))
-    self.ith_step = 0
+    self.ith_step = -1
     
     self.c_Float_3 = c_float*3
     self.traj_array = Trajectory_data*(self.no_of_steps+1)
@@ -101,9 +101,11 @@ class Raisim_towrEnv(gym.Env):
     self.raisim_dll.get_state(self.current_raisim_state)
     
     # goal - curren base position
+    #print('current_raisim:(',np.array(self.current_raisim_state),")\ntowr[",self.ith_step,"](",np.array(self.towr_traj[self.ith_step].base_linear),')')
     for i in range(3):
       self.current_raisim_state[i] = self.towr_traj[self.ith_step].base_linear[i] - self.current_raisim_state[i]
 
+    #print("\nState sent out:",np.array(self.current_raisim_state),"\n\n")
     '''
     State:-{goal_base_pos[3] - base_pos[3],base_quat[4],genralized_joint_angles[3],genralized_joint_velocities[3],genralized_joint_forces[3]}
     '''
@@ -115,7 +117,7 @@ class Raisim_towrEnv(gym.Env):
   def reset(self):
     b_h = c_float(self.base_init_height)
     print('reset')
-    self.ith_step = 0
+    self.ith_step = -1
 
 
     self.raisim_dll._rst(b_h)

@@ -26,7 +26,7 @@ print('action_space:',env.action_space)
 print('state_space:',env.observation_space)
 
 
-for i_episode in range(2):
+for i_episode in range(1):
 	print('\n\nEPISODE_:',i_episode)
 	env.reset()
 
@@ -42,8 +42,8 @@ for i_episode in range(2):
 		t+1 is for query the same position as raisim 
 		as intial state as well is stored in towr_traj'''
 		state,reward,done,_ = env.step(action)
-		print('State:\n',type(state),len(state))
-		print('Reward:\n',type(reward),reward)
-		print('done:\n',type(done))
+		# print('State:\n',type(state),len(state))
+		# print('Reward:\n',type(reward),reward)
+		# print('done:\n',type(done))
 		
 env.close()
