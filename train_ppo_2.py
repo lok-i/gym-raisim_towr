@@ -7,10 +7,10 @@ from stable_baselines import PPO2
 cwd = os.getcwd()
 
 
-no_of_episodes = 700
-no_of_steps_per_epi = 200
+no_of_episodes = 3333
+no_of_steps_per_epi = 300
 
-agent_name = 'state_final_test-('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')[ith_step frm -1]'
+agent_name = 'state_space('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')'
 
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position
@@ -22,10 +22,20 @@ env = DummyVecEnv([lambda: env])
 
 
 
-model = PPO2(MlpPolicy, env, n_steps=no_of_steps_per_epi, verbose=1,tensorboard_log=cwd+'/tf_logs/')
+model = PPO2(MlpPolicy,
+			 env,
+			 gamma=0.95,
+			 learning_rate = 0.00001,
+			 n_steps=no_of_steps_per_epi,
+			 noptepochs=10,
+			 nminibatches=5,
+			 verbose=1,
+			 tensorboard_log=cwd+'/tf_logs/')
 env.reset()
 
-model.learn(total_timesteps=no_of_episodes*no_of_steps_per_epi,log_interval=1,tb_log_name=agent_name)
+model.learn(total_timesteps=no_of_episodes*no_of_steps_per_epi,
+			 log_interval=1,
+			 tb_log_name=agent_name)
 model.save(save_path=cwd+'/models/'+agent_name+'.zip')
 
 

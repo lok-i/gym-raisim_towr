@@ -52,9 +52,81 @@ float base_linear[3];
 float base_angular[3];
 float ee_liner[3];
 float ee_force[3];
+float joint_angles[3];
 //float tau[3];
 
 };
+
+
+
+Eigen::Vector3d Transform_Vector_to_hip_frame_frm_grnd(Eigen::Vector3d base_co,Eigen::Vector3d b_a,Eigen::Vector3d v_g)
+{ Eigen::Matrix<double,4,4> Transform;
+
+//calculate Tgb
+//rotation part
+ Transform(0,0) = cos(b_a[1])*cos(b_a[2]);
+
+ Transform(0,1) = sin(b_a[0])*sin(b_a[1])*cos(b_a[2]) - cos(b_a[0])*sin(b_a[2]);
+ 
+ Transform(0,2) = cos(b_a[0])*sin(b_a[1])*cos(b_a[2]) + sin(b_a[0])*sin(b_a[2]);
+
+ 
+ Transform(1,0) = cos(b_a[1])*sin(b_a[2]);
+
+ Transform(1,1) = sin(b_a[0])*sin(b_a[1])*sin(b_a[2]) + cos(b_a[0])*cos(b_a[2]);
+
+ Transform(1,2) = cos(b_a[0])*sin(b_a[1])*sin(b_a[2]) - sin(b_a[0])*cos(b_a[2]);
+
+ 
+ Transform(2,0) = -1*sin(b_a[1]);
+
+ Transform(2,1) = sin(b_a[0])*cos(b_a[1]);
+
+ Transform(2,2) = cos(b_a[0])*cos(b_a[1]);
+ //linear distance from gound origin
+ Transform(0,3) = base_co[0];
+ Transform(1,3) = base_co[1];
+ Transform(2,3) = base_co[2];
+// last dummy row 
+for (int i =0 ;i <4;i++)
+ {
+if(i==3)
+Transform(3,i) = 1;
+else
+Transform(3,i) = 0;
+}
+
+//Tgb is ready now need to convert to Tgh
+//need to consider an offset along the z axis of the new frame (base to hip)
+ Eigen::VectorXd Hip_wrt_g(4);
+ Eigen::VectorXd Hip_in_base(4);
+ Hip_in_base << 0, 0, -0.15, 1;
+ Hip_wrt_g = Transform*Hip_in_base;
+ 
+ for (int i =0 ;i <4;i++)
+ Transform(i,3) = Hip_wrt_g(i);
+
+ /////Tgh is ready..but we need Thg = Tgh^-1
+ Eigen::Matrix<double,4,4> Transform_inv = Transform.inverse();
+ //vec3 to vec4 for homogeneous co-ordinate system
+ Eigen::VectorXd Input(4),Output(4);
+ for (int i =0 ;i <4;i++)
+ if(i==3)
+ Input(i)= 1;
+ else
+ Input(i) = v_g(i);
+
+ Output = Transform_inv*Input ;
+
+ return(Eigen::Vector3d(Output[0],Output[1],Output[2])); }
+
+
+void ik_solver(Eigen::Vector3d & q0,Eigen::Vector3d Base_co,Eigen::Vector3d Base_a,Eigen::Vector3d ee_grnd)
+{
+    xpp::HyqlegInverseKinematics leg;
+    Eigen::Vector3d ee_H = Transform_Vector_to_hip_frame_frm_grnd(Base_co,Base_a,ee_grnd);
+    q0   = leg.GetJointAngles(ee_H);
+}
 
 
 
@@ -139,7 +211,17 @@ int i =0;
     //base angles to radian
     Eigen::Vector3d rad = solution.base_angular_->GetPoint(t).p();
     rad =  rad/M_PI*180;
+    
+    Eigen::Vector3d q0 ; 
+    ik_solver(q0,
+              Eigen::Vector3d(solution.base_linear_->GetPoint(t).p().transpose()),
+              rad,
+              Eigen::Vector3d(solution.ee_motion_.at(0)->GetPoint(t).p().transpose())
+              );
 
+
+    
+    
 
     for(int j=0;j<3;j++)
         {    
@@ -151,7 +233,9 @@ int i =0;
              
              (data+i)->ee_liner[j] = solution.ee_motion_.at(0)->GetPoint(t).p().transpose()[j];
 
-             (data+i)->ee_force[j] = solution.ee_force_.at(0)->GetPoint(t).p().transpose()[j];            
+             (data+i)->ee_force[j] = solution.ee_force_.at(0)->GetPoint(t).p().transpose()[j];
+
+             (data+i)->joint_angles[j] = q0[j];         
 
         }
     //cout<<"\n"<<t<<"\n";
@@ -194,6 +278,10 @@ int i =0;
     t += time_step;
   }}
 }
+
+
+
+
 
 
 
