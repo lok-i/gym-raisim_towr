@@ -6,24 +6,15 @@ from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.common.env_checker import check_env
 from stable_baselines import PPO2
 import time 
-
+from test_params import *
 cwd = os.getcwd()
-''' the inner loop should
-run no_of_steps  
-and towr traj will contain 
-no_of_steps +1 element (including intial state)
-hence querry from 1 to no_of_steps from the
-towr_traj array 
+
+'''
+model name ,target,no of epidodes,
+no of steps are all defined in
+test_params.py file
 '''
 
-no_of_episodes = 3333
-no_of_steps_per_epi = 300
-
-agent_name = 'state_space('+str(no_of_episodes)+')-('+str(no_of_steps_per_epi)+')'
-
-# independent of last z axis as it will be towr depended 
-# thus only x and y matter of the final base position
-target = [1,1,0.54]
 env = gym.make('gym_raisim_towr:raisim_towr-v0',
 				render=True,
 				base_linear_target=target,
@@ -47,7 +38,7 @@ for i_episode in range(10):
 	r = 0
 
 	for t in range(no_of_steps_per_epi):
-		time.sleep(0.1)
+		time.sleep(0.001)
 		action,_ = model.predict(state)
 		
 	

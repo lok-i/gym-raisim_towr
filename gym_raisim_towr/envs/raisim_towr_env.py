@@ -31,34 +31,49 @@ class Raisim_towrEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self,base_linear_target,base_init_height = 0.54,render=True,no_of_steps=20,gravity=True):
-    self.no_of_steps = no_of_steps # also the no of sampled from towr initially == no of steps per episode
+    # also the no of sampled from towr initially == no of steps per episode
+    self.no_of_steps = no_of_steps 
     self.render_status = render
     self.base_init_height = base_init_height
-
+    '''
+    ith_step - keeps count of the index of the towr traj 
+    that needs to be compared with the curret step of raisim
+    simulation to calclate reward as well as give the expected 
+    goal state in the state space and gets reset once the episode 
+    ends ie when ithstep == no_of_steps
+    '''
     self.action_space = spaces.Box(low=-1.0, high=1.0,shape=(3,))
-
-    #cant set low , high as the diff of position is present
-    
     self.observation_space = spaces.Box(low=-1.0, high=1.0,shape=(17,))
     self.ith_step = -1
 
+    #limits set to normalize the state space and action space
     self.joint_w_limit = 5
     self.joint_tau_limit = 10
+    self.joint_a_limit = 1
     
+    #data type to take care of handling arrays from the c dll's
     self.c_Float_3 = c_float*3
+
+    #array to save the towr predicted trajectory
     self.traj_array = Trajectory_data*(self.no_of_steps+1)
-    
     self.towr_traj = self.traj_array()
+
+    #array to get the current raisim state from raisim.dll
     self.current_raisim_state = (c_float*16)()
+
+    #target array to be sent to towr
     self.base_linear_target = self.c_Float_3()
     for i in range(3):
       self.base_linear_target[i] = base_linear_target[i]
 
-
+    #function calls to initialize raisim.dll and towr.dll function parameters
     self._init_raisim_dll()
     self._init_towr_dll()
     
+    #function calls,to calculate towr trajectory
     self.towr_dll.Trajectory(self.towr_traj,c_float(self.base_init_height),self.base_linear_target,c_int(self.no_of_steps))    
+    
+    #function calls,to initialize visual and world elements in raisim
     self.raisim_dll._init_ViSsetup(c_bool(gravity))
     self.raisim_dll._init_monopend(c_float(self.base_init_height))
     
@@ -100,26 +115,29 @@ class Raisim_towrEnv(gym.Env):
   def step(self, action):
     done = False
     self.ith_step +=1
-    #scalling up the outuput to angles
-    action = np.pi*0.5*np.array(action)
+
+    #scalling up the output to angles
+    action = self.joint_a_limit*np.array(action)
     target_angle = self.c_Float_3()
     for i in range(3):
       target_angle[i] = action[i]
 
-    #target angle _ pd targets   
+    #target angle - send pd targets   
     self.raisim_dll._sim(target_angle,self.render_status)
-    #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques
+    #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
     self.raisim_dll.get_state(self.current_raisim_state)
     
     '''
-    State:-{base_quat[4],genralized_joint_angles[3],genralized_joint_velocities[3],genralized_joint_forces[3]
-            goal_base_quat(t+1)[4]}
+    State Space to agent:-
+    [base_quat[4],genralized_joint_angles[3],genralized_joint_velocities[3],genralized_joint_forces[3],
+     goal_base_quat(t+1)[4]]
     '''
     state = np.zeros(17)
   
     if self.ith_step ==self.no_of_steps:
       done = True
 
+    #Clipping and Normalizing the state space and initializing
     else:
       root_quat = euler_to_quaternion(self.towr_traj[self.ith_step+1].base_angular)
       for i in range(13):
@@ -130,14 +148,14 @@ class Raisim_towrEnv(gym.Env):
           state[i] = state[i]/(np.pi*0.5) #normalize angles
         else:
           if(i>6 and i<=9):
-            if(state[i]>self.joint_w_limit): #clip_ang_velocity
+            if(state[i]>self.joint_w_limit): #clip_joint_velocity
               state[i] =self.joint_w_limit
             elif(state[i]<-self.joint_w_limit):
               state[i] =-self.joint_w_limit
 
             state[i] = state[i]/self.joint_w_limit# normalize j_w
           elif(i>9):
-            if(state[i]>self.joint_tau_limit): #clip _tau
+            if(state[i]>self.joint_tau_limit): #clip _join_tau
               state[i] =self.joint_tau_limit
             elif(state[i]<-self.joint_tau_limit):
               state[i] =-self.joint_tau_limit
@@ -148,40 +166,56 @@ class Raisim_towrEnv(gym.Env):
         state[13+i]=root_quat[i] #quat alredy normalized
       
   
+
     return state,self.calc_reward(self.ith_step),done,{}
 
     
   def reset(self):
+    #b_h - the bot will be rest at 0,0,b_h with the default joint angles
     b_h = c_float(self.base_init_height)
     print('reset')
+    #reset ithstep
     self.ith_step = -1
     self.raisim_dll._rst(b_h)
+    #display the reset if required
     if(self.render_status):
       self.render()
-
+    '''
+    to return a state the state space, @ t=0
+    base position angles:-
+    '''
     angle_1 = 2*1.09542/np.pi
     angle_2 = 2*-2.3269/np.pi
-    state,r,d,_ = self.step([0,angle_1,angle_2])#base position angles
+    state,r,d,_ = self.step([0,angle_1,angle_2])
     return state
     
   def calc_reward(self, ith_step):
-    #only base pose and orientation is considered
+    #base position,base orientation and joint angles from towr is considered
 
+    #weights for each part
     w_base_pos_quat = 0.15
+    w_j_a           = 0.5
+
+    #making them np arrays
     towr_pose = np.array(self.towr_traj[ith_step].base_linear)
-    towr_quat = np.array(euler_to_quaternion(self.towr_traj[ith_step].base_angular)) 
+    towr_quat = np.array(euler_to_quaternion(self.towr_traj[ith_step].base_angular))
+    towr_j_a  = np.array(self.towr_traj[ith_step].joint_angles) 
     
     raisim_pose = np.array([self.current_raisim_state[0],self.current_raisim_state[1],self.current_raisim_state[2]])
     raisim_quat = np.array([self.current_raisim_state[3],self.current_raisim_state[4],self.current_raisim_state[5],self.current_raisim_state[6]])
+    raisim_j_a  = np.array([self.current_raisim_state[7],self.current_raisim_state[8],self.current_raisim_state[9]])
     
-    pose_diff_mse = np.mean(np.square(np.subtract(towr_pose,raisim_pose)))
+    #calculating the mse for each part 
+    pos_diff_mse = np.mean(np.square(np.subtract(towr_pose,raisim_pose)))
     quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
+    j_a_mse       = np.mean(np.square(np.subtract(towr_j_a,raisim_j_a)))
   
-    reward =w_base_pos_quat*np.exp(-20*pose_diff_mse + -10*quat_diff_mse)
+    #final rewar:-
+    reward =w_base_pos_quat*np.exp(-20*pos_diff_mse + -10*quat_diff_mse)+w_j_a * np.exp(-5*j_a_mse)
 
     # print("\n\ntowr_pose_:",towr_pose,'\t',"raisim_pose_:",raisim_pose,'\n')
     # print("towr_quat_:",towr_quat,'\t',"raisim_quat_:",raisim_quat,'\n')
-    # print("pose_mse_:",pose_diff_mse,'\t',"quat_mse_:",quat_diff_mse,"\n")
+    # print("pose_mse_:",pos_diff_mse,'\t',"quat_mse_:",quat_diff_mse,"\n")
     # print("reward_:",reward)
 
     return reward
@@ -193,6 +227,7 @@ class Raisim_towrEnv(gym.Env):
 
     
   def render(self):
+    #to render a single frame
     self.raisim_dll._render()
 
 

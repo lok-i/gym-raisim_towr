@@ -123,11 +123,11 @@ Transform(3,i) = 0;
 
 void ik_solver(Eigen::Vector3d & q0,Eigen::Vector3d Base_co,Eigen::Vector3d Base_a,Eigen::Vector3d ee_grnd)
 {
+
     xpp::HyqlegInverseKinematics leg;
     Eigen::Vector3d ee_H = Transform_Vector_to_hip_frame_frm_grnd(Base_co,Base_a,ee_grnd);
     q0   = leg.GetJointAngles(ee_H);
 }
-
 
 
 
