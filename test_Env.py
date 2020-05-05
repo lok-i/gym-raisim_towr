@@ -14,7 +14,7 @@ def stardize(a):
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position
 
-no_of_steps = 200
+no_of_steps = 1000
 base_init_height = 0.54
 target = [10,20,0.54]
 
@@ -52,20 +52,21 @@ print('action_space:',env.action_space)
 print('state_space:',env.observation_space)
 
 
-
-for i_episode in range(1):
-	print('\n\nEPISODE_:',i_episode)
-	env.reset()
-	sleep(1)
-	for t in range(no_of_steps):
-		sleep(0.01)
-		action = env.action_space.sample()
-		state,reward,done,_ = env.step(action)
-		print('State:\n',state)
-		print('Reward:\n',reward)
-		print('done:\n',done)
+def test_env():
+	for i_episode in range(1):
+		print('\n\nEPISODE_:',i_episode)
+		env.reset()
+		sleep(1)
+		for t in range(no_of_steps):
+			sleep(0.01)
+			action = env.action_space.sample()
+			state,reward,done,_ = env.step(action)
+			print('State:\n',state)
+			print('Reward:\n',reward)
+			print('done:\n',done)
 		
-env.close()
+	env.close()
+
 plot_towr()
 
 

@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named towr_dll
+
+# Build rule for target.
+towr_dll: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 towr_dll
+.PHONY : towr_dll
+
+# fast build rule for target.
+towr_dll/fast:
+	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/build
+.PHONY : towr_dll/fast
+
+#=============================================================================
 # Target rules for targets named raisim_dll
 
 # Build rule for target.
@@ -124,17 +137,57 @@ raisim_dll/fast:
 .PHONY : raisim_dll/fast
 
 #=============================================================================
-# Target rules for targets named towr_dll
+# Target rules for targets named towr_anymal_dll
 
 # Build rule for target.
-towr_dll: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 towr_dll
-.PHONY : towr_dll
+towr_anymal_dll: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 towr_anymal_dll
+.PHONY : towr_anymal_dll
 
 # fast build rule for target.
-towr_dll/fast:
-	$(MAKE) -f CMakeFiles/towr_dll.dir/build.make CMakeFiles/towr_dll.dir/build
-.PHONY : towr_dll/fast
+towr_anymal_dll/fast:
+	$(MAKE) -f CMakeFiles/towr_anymal_dll.dir/build.make CMakeFiles/towr_anymal_dll.dir/build
+.PHONY : towr_anymal_dll/fast
+
+#=============================================================================
+# Target rules for targets named raisim_anymal_dll
+
+# Build rule for target.
+raisim_anymal_dll: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 raisim_anymal_dll
+.PHONY : raisim_anymal_dll
+
+# fast build rule for target.
+raisim_anymal_dll/fast:
+	$(MAKE) -f CMakeFiles/raisim_anymal_dll.dir/build.make CMakeFiles/raisim_anymal_dll.dir/build
+.PHONY : raisim_anymal_dll/fast
+
+raisim_anymal_dll.o: raisim_anymal_dll.cpp.o
+
+.PHONY : raisim_anymal_dll.o
+
+# target to build an object file
+raisim_anymal_dll.cpp.o:
+	$(MAKE) -f CMakeFiles/raisim_anymal_dll.dir/build.make CMakeFiles/raisim_anymal_dll.dir/raisim_anymal_dll.cpp.o
+.PHONY : raisim_anymal_dll.cpp.o
+
+raisim_anymal_dll.i: raisim_anymal_dll.cpp.i
+
+.PHONY : raisim_anymal_dll.i
+
+# target to preprocess a source file
+raisim_anymal_dll.cpp.i:
+	$(MAKE) -f CMakeFiles/raisim_anymal_dll.dir/build.make CMakeFiles/raisim_anymal_dll.dir/raisim_anymal_dll.cpp.i
+.PHONY : raisim_anymal_dll.cpp.i
+
+raisim_anymal_dll.s: raisim_anymal_dll.cpp.s
+
+.PHONY : raisim_anymal_dll.s
+
+# target to generate assembly for a file
+raisim_anymal_dll.cpp.s:
+	$(MAKE) -f CMakeFiles/raisim_anymal_dll.dir/build.make CMakeFiles/raisim_anymal_dll.dir/raisim_anymal_dll.cpp.s
+.PHONY : raisim_anymal_dll.cpp.s
 
 raisim_dll.o: raisim_dll.cpp.o
 
@@ -162,6 +215,33 @@ raisim_dll.s: raisim_dll.cpp.s
 raisim_dll.cpp.s:
 	$(MAKE) -f CMakeFiles/raisim_dll.dir/build.make CMakeFiles/raisim_dll.dir/raisim_dll.cpp.s
 .PHONY : raisim_dll.cpp.s
+
+towr_anymal_dll.o: towr_anymal_dll.cpp.o
+
+.PHONY : towr_anymal_dll.o
+
+# target to build an object file
+towr_anymal_dll.cpp.o:
+	$(MAKE) -f CMakeFiles/towr_anymal_dll.dir/build.make CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o
+.PHONY : towr_anymal_dll.cpp.o
+
+towr_anymal_dll.i: towr_anymal_dll.cpp.i
+
+.PHONY : towr_anymal_dll.i
+
+# target to preprocess a source file
+towr_anymal_dll.cpp.i:
+	$(MAKE) -f CMakeFiles/towr_anymal_dll.dir/build.make CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.i
+.PHONY : towr_anymal_dll.cpp.i
+
+towr_anymal_dll.s: towr_anymal_dll.cpp.s
+
+.PHONY : towr_anymal_dll.s
+
+# target to generate assembly for a file
+towr_anymal_dll.cpp.s:
+	$(MAKE) -f CMakeFiles/towr_anymal_dll.dir/build.make CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.s
+.PHONY : towr_anymal_dll.cpp.s
 
 towr_dll.o: towr_dll.cpp.o
 
@@ -197,12 +277,20 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... edit_cache"
-	@echo "... raisim_dll"
 	@echo "... towr_dll"
+	@echo "... raisim_dll"
+	@echo "... edit_cache"
+	@echo "... towr_anymal_dll"
+	@echo "... raisim_anymal_dll"
+	@echo "... raisim_anymal_dll.o"
+	@echo "... raisim_anymal_dll.i"
+	@echo "... raisim_anymal_dll.s"
 	@echo "... raisim_dll.o"
 	@echo "... raisim_dll.i"
 	@echo "... raisim_dll.s"
+	@echo "... towr_anymal_dll.o"
+	@echo "... towr_anymal_dll.i"
+	@echo "... towr_anymal_dll.s"
 	@echo "... towr_dll.o"
 	@echo "... towr_dll.i"
 	@echo "... towr_dll.s"

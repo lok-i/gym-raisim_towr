@@ -148,6 +148,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/raisim_dll.dir/DependInfo.cmake"
   "CMakeFiles/towr_dll.dir/DependInfo.cmake"
+  "CMakeFiles/raisim_dll.dir/DependInfo.cmake"
+  "CMakeFiles/towr_anymal_dll.dir/DependInfo.cmake"
+  "CMakeFiles/raisim_anymal_dll.dir/DependInfo.cmake"
   )

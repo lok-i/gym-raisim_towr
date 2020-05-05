@@ -33,6 +33,7 @@ endfunction()
 
 
 create_sharedlib(raisim_dll raisim_dll.cpp)
+create_sharedlib(raisim_anymal_dll raisim_anymal_dll.cpp)
 
 create_sharedlib(towr_dll towr_dll.cpp)
-
+create_sharedlib(towr_anymal_dll towr_anymal_dll.cpp)

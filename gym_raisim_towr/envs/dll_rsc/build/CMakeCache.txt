@@ -209,6 +209,9 @@ raisimOgre_DIR:PATH=/home/lok/Raisim/raisim_build/share/raisimOgre/cmake
 raisim_DIR:PATH=/usr/local/lib/cmake/raisim
 
 //Dependencies for the target
+raisim_anymal_dll_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython2.7.so;general;raisim::raisimOgre;general;ifopt::ifopt_ipopt;general;towr::towr;
+
+//Dependencies for the target
 raisim_dll_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython2.7.so;general;raisim::raisimOgre;general;ifopt::ifopt_ipopt;general;towr::towr;
 
 //Value Computed by CMake
@@ -219,6 +222,9 @@ raisim_towr_SOURCE_DIR:STATIC=/home/lok/RBCCPS_projects/gym-raisim_towr/gym_rais
 
 //The directory containing a CMake configuration file for towr.
 towr_DIR:PATH=/usr/local/share/towr/cmake
+
+//Dependencies for the target
+towr_anymal_dll_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython2.7.so;general;raisim::raisimOgre;general;ifopt::ifopt_ipopt;general;towr::towr;
 
 //Dependencies for the target
 towr_dll_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython2.7.so;general;raisim::raisimOgre;general;ifopt::ifopt_ipopt;general;towr::towr;

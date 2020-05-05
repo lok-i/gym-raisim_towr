@@ -122,7 +122,8 @@ class Raisim_towrEnv(gym.Env):
     for i in range(3):
       target_angle[i] = action[i]
 
-    #target angle - send pd targets   
+    #target angle - send pd targets 
+      
     self.raisim_dll._sim(target_angle,self.render_status)
     #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
     self.raisim_dll.get_state(self.current_raisim_state)
@@ -163,7 +164,7 @@ class Raisim_towrEnv(gym.Env):
 
       for i in range(3):
         #goal orienation quaternion of the next step
-        state[13+i]=root_quat[i] #quat alredy normalized
+        state[13+i]=0#root_quat[i] #quat alredy normalized
       
   
 
@@ -193,27 +194,32 @@ class Raisim_towrEnv(gym.Env):
     #base position,base orientation and joint angles from towr is considered
 
     #weights for each part
-    w_base_pos_quat = 0.15
-    w_j_a           = 0.5
+    w_base_pos_quat = 0 #0.15
+    w_j_a           = 0 #0.5
+    w_balance       = -1
 
     #making them np arrays
-    towr_pose = np.array(self.towr_traj[ith_step].base_linear)
+    towr_pos = np.array(self.towr_traj[ith_step].base_linear)
     towr_quat = np.array(euler_to_quaternion(self.towr_traj[ith_step].base_angular))
     towr_j_a  = np.array(self.towr_traj[ith_step].joint_angles) 
     
-    raisim_pose = np.array([self.current_raisim_state[0],self.current_raisim_state[1],self.current_raisim_state[2]])
+    raisim_pos = np.array([self.current_raisim_state[0],self.current_raisim_state[1],self.current_raisim_state[2]])
     raisim_quat = np.array([self.current_raisim_state[3],self.current_raisim_state[4],self.current_raisim_state[5],self.current_raisim_state[6]])
     raisim_j_a  = np.array([self.current_raisim_state[7],self.current_raisim_state[8],self.current_raisim_state[9]])
     
     #calculating the mse for each part 
-    pos_diff_mse = np.mean(np.square(np.subtract(towr_pose,raisim_pose)))
+    pos_diff_mse = np.mean(np.square(np.subtract(towr_pos,raisim_pos)))
     quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
     j_a_mse       = np.mean(np.square(np.subtract(towr_j_a,raisim_j_a)))
-  
-    #final rewar:-
-    reward =w_base_pos_quat*np.exp(-20*pos_diff_mse + -10*quat_diff_mse)+w_j_a * np.exp(-5*j_a_mse)
+    level = -1
+    if raisim_pos[2]<0.5:
+        level = 1
+    
 
-    # print("\n\ntowr_pose_:",towr_pose,'\t',"raisim_pose_:",raisim_pose,'\n')
+    #final rewar:-
+    reward =w_base_pos_quat*np.exp(-20*pos_diff_mse + -10*quat_diff_mse)+w_j_a * np.exp(-5*j_a_mse) + w_balance*level
+
+    # print("\n\ntowr_pos_:",towr_pos,'\t',"raisim_pos_:",raisim_pos,'\n')
     # print("towr_quat_:",towr_quat,'\t',"raisim_quat_:",raisim_quat,'\n')
     # print("pose_mse_:",pos_diff_mse,'\t',"quat_mse_:",quat_diff_mse,"\n")
     # print("reward_:",reward)
