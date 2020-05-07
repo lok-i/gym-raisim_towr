@@ -293,6 +293,7 @@ CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/ifopt/i
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/ifopt/problem.h
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/ifopt/solver.h
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/ifopt/variable_set.h
+CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/towr/initialization/gait_generator.h
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/towr/models/dynamic_model.h
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/towr/models/kinematic_model.h
 CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o: /usr/local/include/towr/models/robot_model.h

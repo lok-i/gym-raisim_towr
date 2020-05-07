@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ifopt/ipopt_solver.h>
 #include <xpp_inv/hyqleg_inverse_kinematics.h>
 #include <xpp_inv/cartesian_declarations.h>
-
+#include <towr/initialization/gait_generator.h>
 //#define base_height_initial 0.54
 #define towr_initial_output false
 using namespace towr;
@@ -90,11 +90,30 @@ void towr_trajectory(NlpFormulation &formulation,SplineHolder &solution,Eigen::V
   formulation.final_base_.lin.at(towr::kPos) = target;
   
 
+    auto gait_gen_ = GaitGenerator::MakeGaitGenerator(n_ee);
+    
+    // overlap-walk -0
+    // fly trot - 1
+    // pace - 2
+    // bound - 3
+    // gallop - 4
+    GaitGenerator::Combos k = GaitGenerator::Combos(0); //walk combo
+    switch(k)
+    {
+     case(0):{std::cout<<"\n\nGait_selected:overlap-walk\n\n";break;}
+     case(1):{std::cout<<"\n\nGait_selected:fly trot\n\n";break;}
+     case(2):{std::cout<<"\n\nGait_selected:pace\n\n";break;}
+     case(3):{std::cout<<"\n\nGait_selected:bound\n\n";break;}
+     case(4):{std::cout<<"\n\nGait_selected:gallop\n\n";break;}
+     default:break;
+     }
+    gait_gen_->SetCombo(k);
+    double total_duration = 2.0;
     //random phase duration , actually monoped
     for (int ee=0; ee<n_ee; ++ee) 
     {
-      formulation.params_.ee_phase_durations_.push_back({0.4, 0.2, 0.4, 0.2, 0.4, 0.2, 0.2});
-      formulation.params_.ee_in_contact_at_start_.push_back(true);
+      formulation.params_.ee_phase_durations_.push_back(gait_gen_->GetPhaseDurations(total_duration, ee));
+      formulation.params_.ee_in_contact_at_start_.push_back(gait_gen_->IsInContactAtStart(ee));
     }
 
 
@@ -120,7 +139,7 @@ void towr_trajectory(NlpFormulation &formulation,SplineHolder &solution,Eigen::V
   // solver->SetOption("derivative_test", "first-order");
   auto solver = std::make_shared<ifopt::IpoptSolver>();
   solver->SetOption("jacobian_approximation", "exact"); // "finite difference-values"
-  solver->SetOption("max_cpu_time", 20.0);
+  solver->SetOption("max_cpu_time", 40.0);
   solver->Solve(nlp);
  
   // Can directly view the optimization variables through:

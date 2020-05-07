@@ -31,6 +31,8 @@ xpp_inv/hyqleg_inverse_kinematics.h
 -
 xpp_inv/cartesian_declarations.h
 -
+towr/initialization/gait_generator.h
+-
 
 /usr/include/eigen3/Eigen/Cholesky
 Core
@@ -1473,6 +1475,16 @@ ifopt/problem.h
 /usr/local/include/ifopt/variable_set.h
 composite.h
 /usr/local/include/ifopt/composite.h
+
+/usr/local/include/towr/initialization/gait_generator.h
+memory
+-
+string
+-
+utility
+-
+vector
+-
 
 /usr/local/include/towr/models/dynamic_model.h
 memory

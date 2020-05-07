@@ -294,6 +294,7 @@ CMakeFiles/towr_anymal_dll.dir/towr_anymal_dll.cpp.o
  /usr/local/include/ifopt/problem.h
  /usr/local/include/ifopt/solver.h
  /usr/local/include/ifopt/variable_set.h
+ /usr/local/include/towr/initialization/gait_generator.h
  /usr/local/include/towr/models/dynamic_model.h
  /usr/local/include/towr/models/kinematic_model.h
  /usr/local/include/towr/models/robot_model.h

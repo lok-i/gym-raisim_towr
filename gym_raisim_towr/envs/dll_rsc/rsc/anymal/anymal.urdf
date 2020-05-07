@@ -1,9 +1,10 @@
+<!--
 <?xml version="1.0" encoding="utf-8"?>
-<!-- =================================================================================== -->
-<!--   Copyright 2019 ANYbotics, https://www.anybotics.com                               -->
-<!-- =================================================================================== -->
-<!-- This file contains the description of the ANYmal B robot. -->
-<?xml version="1.0" ?>
+<=================================================================================== 
+  Copyright 2019 ANYbotics, https://www.anybotics.com                               
+ ===================================================================================
+This file contains the description of the ANYmal B robot.
+<?xml version="1.0" ?> -->
 <robot name="anymal">
 
     <!--

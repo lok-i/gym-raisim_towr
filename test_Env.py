@@ -16,7 +16,7 @@ def stardize(a):
 
 no_of_steps = 1000
 base_init_height = 0.54
-target = [10,20,0.54]
+target = [5,0,0.54]
 
 def plot_towr():
 	fig = plt.figure()
@@ -32,13 +32,51 @@ def plot_towr():
 	
 	plt.title(label='Towr_trajectory',loc='center')
 	plt.plot(Base[1:,0],Base[1:,1],Base[1:,2],label = "Base")
-	plt.plot(EE[1:,0],EE[1:,1],EE[1:,2],label = "EE")
+	plt.plot(EE_l1[1:,0],EE_l1[1:,1],EE_l1[1:,2],label = "EE")
 	
 	
 	ax.legend()
 	plt.show()
 
-env = gym.make('gym_raisim_towr:raisim_towr-v0',
+
+def plot_towr_anymal():
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+
+	Base = np.array([[0,0,0]])
+	EE_l1 = np.array([[0,0,0]])
+	EE_l2 = np.array([[0,0,0]])
+	EE_l3 = np.array([[0,0,0]])
+	EE_l4 = np.array([[0,0,0]])
+
+	for i in range(no_of_steps+1):
+		base = np.array(env.towr_traj[i].base_linear)
+        #four legs
+		for j in range(4):
+			ee  = np.array([env.towr_traj[i].ee_linear[0+3*j],env.towr_traj[i].ee_linear[1+3*j],env.towr_traj[i].ee_linear[2+3*j]])
+			if j==0:
+				EE_l1=np.append(EE_l1,[ee],axis=0)
+			elif j==1:
+				EE_l2=np.append(EE_l2,[ee],axis=0)
+			elif j==2:
+				EE_l3=np.append(EE_l3,[ee],axis=0)
+			elif j==3:
+				EE_l4=np.append(EE_l4,[ee],axis=0)
+		Base=np.append(Base,[base],axis=0)
+		
+	plt.title(label='Towr_trajectory-target:'+str(target),loc='center')
+	plt.plot(Base[1:,0],Base[1:,1],Base[1:,2],label = "Base")
+	plt.plot(EE_l1[1:,0],EE_l1[1:,1],EE_l1[1:,2],label = "EE_l1")
+	plt.plot(EE_l2[1:,0],EE_l2[1:,1],EE_l2[1:,2],label = "EE_l2")
+	plt.plot(EE_l3[1:,0],EE_l3[1:,1],EE_l3[1:,2],label = "EE_l3")
+	plt.plot(EE_l4[1:,0],EE_l4[1:,1],EE_l4[1:,2],label = "EE_l4")
+	
+	
+	ax.legend()
+	plt.show()
+
+
+env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',
 				render=True,
 				base_linear_target=target,
 				no_of_steps=no_of_steps,
@@ -55,11 +93,17 @@ print('state_space:',env.observation_space)
 def test_env():
 	for i_episode in range(1):
 		print('\n\nEPISODE_:',i_episode)
-		env.reset()
-		sleep(1)
+		state = env.reset()
+		#print('State:\n',state)
+		env.render()
+		sleep(0.01)
 		for t in range(no_of_steps):
 			sleep(0.01)
-			action = env.action_space.sample()
+			#action = env.action_space.sample()
+			action = (2/np.pi)*np.array([0.03, 0.4,-0.8,
+                       -0.03, 0.4, -0.8,
+                        0.03, -0.4, 0.8,
+                       -0.03, -0.4, 0.8 ])
 			state,reward,done,_ = env.step(action)
 			print('State:\n',state)
 			print('Reward:\n',reward)
@@ -67,6 +111,8 @@ def test_env():
 		
 	env.close()
 
-plot_towr()
+#test_env()
+#env.print_towr_traj()
+plot_towr_anymal()
 
 
