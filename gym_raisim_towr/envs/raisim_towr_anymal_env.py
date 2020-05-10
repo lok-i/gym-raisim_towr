@@ -5,6 +5,32 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from ctypes import *
 import random
+import pybullet as p
+
+'''
+* in raisim the real value is in the first and py bullet its in the last
+* the end effector co - ordinates should be wrt to worl frame
+'''
+def pybullet_ik(base_pos,base_quat,ee1,ee2,ee3,ee4):
+    base_pos = list(base_pos)
+    base_quat = [base_quat[1],base_quat[2],base_quat[3],base_quat[0]]
+    p.resetBasePositionAndOrientation(geo_anymal, base_pos,base_quat)
+    # ul = list(np.full(21,1.57))
+    # ll = list(np.full(21,-1.57))
+    # rp = [0,0.03, 0.4,-0.8,0,0,-0.03, 0.4, -0.8,0,0, 0.03, -0.4, 0.8,0,0,-0.03, -0.4, 0.8,0,0 ]
+    # jr = [0,0.03, 0.4,-0.8,0,0,-0.03, 0.4, -0.8,0,0, 0.03, -0.4, 0.8,0,0,-0.03, -0.4, 0.8,0,0 ]
+    leg1 = p.calculateInverseKinematics(geo_anymal,5 ,ee1) 
+    leg2 = p.calculateInverseKinematics(geo_anymal,10,ee2) 
+    leg3 = p.calculateInverseKinematics(geo_anymal,15,ee3) 
+    leg4 = p.calculateInverseKinematics(geo_anymal,20,ee4)
+    angles_12 = [leg1[0],leg1[1],leg1[2],
+                 leg2[3],leg2[4],leg2[5],
+                 leg3[6],leg3[7],leg3[8],
+                 leg4[9],leg4[10],leg4[11]]
+    #inconsistency in ik solver
+    angles_12 = np.clip(np.array(angles_12),-1.57,1.57)
+    return(angles_12)
+
 
 cwd_path = os.getcwd()
 
@@ -15,6 +41,16 @@ def euler_to_quaternion(r):
     qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
     return [ qw, qx, qy, qz]
+
+
+
+
+p.connect(p.DIRECT)
+file_path = cwd_path +"/gym_raisim_towr/envs/dll_rsc/rsc/anymal/anymal.urdf"
+p.setGravity(0,0,-10)
+geo_anymal = p.loadURDF(file_path)
+
+
 
 class Trajectory_data(Structure):
     _fields_ = [
@@ -43,13 +79,13 @@ class Raisim_towr_anymalEnv(gym.Env):
     ends ie when ithstep == no_of_steps
     '''
     self.action_space = spaces.Box(low=-1.0, high=1.0,shape=(12,))
-    self.observation_space = spaces.Box(low=-1.0, high=1.0,shape=(44,))
+    self.observation_space = spaces.Box(low=-1.0, high=1.0,shape=(56,))
     self.ith_step = -1
 
     #limits set to normalize the state space and action space
-    self.joint_w_limit = 5
-    self.joint_tau_limit = 10
-    self.joint_a_limit = 1.57
+    self.joint_w_limit = 100
+    self.joint_tau_limit = 100
+    self.joint_a_limit = 0.3926991
     
     #data type to take care of handling arrays from the c dll's
     self.c_Float_3 = c_float*3
@@ -78,6 +114,29 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.raisim_dll._init_anymal(c_float(self.base_init_height))
     
   
+    '''
+    finds the max and min angle limits for a given 
+    towr traj
+    '''
+  def find_angle_limit(self):
+    max_angles = np.full(12,-np.inf)
+    min_angles = np.full(12, np.inf)
+    for i in range(self.no_of_steps+1):
+        towr_base_pos = np.array(self.towr_traj[i].base_linear)
+        towr_base_quat = np.array(euler_to_quaternion(self.towr_traj[i].base_angular))
+        towr_angles = pybullet_ik(towr_base_pos,towr_base_quat, self.towr_traj[i].ee_linear[0:3],
+                                                                self.towr_traj[i].ee_linear[3:6],
+                                                                self.towr_traj[i].ee_linear[6:9],
+                                                                self.towr_traj[i].ee_linear[9:12]) 
+        for i in range(12):
+            if(max_angles[i]<towr_angles[i]):
+                max_angles[i] = towr_angles[i]
+            if(min_angles[i]>towr_angles[i]):
+                min_angles[i] = towr_angles[i]
+    print('Upper Bound of angles:\n',max_angles)
+    print('Lower Bound of angles:\n',min_angles)
+
+  
   def _init_raisim_dll(self):
     self.raisim_dll = CDLL(cwd_path+"/gym_raisim_towr/envs/dll_rsc/build/libraisim_anymal_dll.so")
     self.raisim_dll._sim.restype = None
@@ -91,6 +150,7 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.raisim_dll.get_state.restype = None
     self.raisim_dll.get_state.argtype = [c_float*43]
 
+ 
 
 
 
@@ -114,41 +174,41 @@ class Raisim_towr_anymalEnv(gym.Env):
  
 
   def step(self, action):
+    #action is 4x3 ee co ordinates
     done = False
     self.ith_step +=1
-
-    #scalling up the output to angles
     action = self.joint_a_limit*np.array(action)
+
     target_angle = (c_float*12)()
     for i in range(12):
       target_angle[i] = action[i]
 
+    for i in range(4):
     #target angle - send pd targets 
-      
-    self.raisim_dll._sim(target_angle,self.render_status)
+        self.raisim_dll._sim(target_angle,self.render_status)
     #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
-    self.raisim_dll.get_state(self.current_raisim_state)
-    
+        self.raisim_dll.get_state(self.current_raisim_state)
     '''
     State Space to agent:-
     [base_quat[4],genralized_joint_angles[12],genralized_joint_velocities[12],genralized_joint_forces[12],
      goal_base_quat(t+1)[4]]
     '''
-    state = np.zeros(44)
+    state = np.zeros(56)
   
     if self.ith_step ==self.no_of_steps:
       done = True
 
     #Clipping and Normalizing the state space and initializing
     else:
-      root_quat = euler_to_quaternion(self.towr_traj[self.ith_step+1].base_angular)
+      towr_base_quat = euler_to_quaternion(self.towr_traj[self.ith_step+1].base_angular)
+      towr_base_pos  = list(self.towr_traj[self.ith_step+1].base_linear)
       for i in range(40):
         state[i]=self.current_raisim_state[i+3] #skips the base co ordinates
 
         #0 to 3 quat alredy normalized
         
         if(i>3 and i<=15):
-          state[i] = state[i]/(np.pi*0.5) #normalize angles
+          state[i] = state[i]/self.joint_a_limit #normalize angles
         else:
           if(i>15 and i<=27):
             if(state[i]>self.joint_w_limit): #clip_joint_velocity
@@ -166,9 +226,13 @@ class Raisim_towr_anymalEnv(gym.Env):
 
       for i in range(4):
         #goal orienation quaternion of the next step
-        state[40+i]=root_quat[i] #quat alredy normalized
-      
-  
+        state[40+i]=towr_base_quat[i] #quat alredy normalized
+      towr_goal_angles = pybullet_ik(towr_base_pos,towr_base_quat,self.towr_traj[self.ith_step+1].ee_linear[0:3],
+                                                                  self.towr_traj[self.ith_step+1].ee_linear[3:6],
+                                                                  self.towr_traj[self.ith_step+1].ee_linear[6:9],
+                                                                  self.towr_traj[self.ith_step+1].ee_linear[9:12])
+      for i in range(12):
+        state[44+i] = towr_goal_angles[i]
 
     return state ,self.calc_reward(self.ith_step),done,{}
 
@@ -188,10 +252,10 @@ class Raisim_towr_anymalEnv(gym.Env):
     base position angles:-
     '''
     # action space is symmetrical -1 to 1 - radian/1.57 to make it in the range -1 to 1
-    angles= (2/np.pi)*np.array([0.03, 0.4,-0.8,
-                       -0.03, 0.4, -0.8,
-                        0.03, -0.4, 0.8,
-                       -0.03, -0.4, 0.8 ])
+    angles= (1/self.joint_a_limit)*np.array([0.03, 0.4,-0.8,
+                                            -0.03, 0.4, -0.8,
+                                             0.03, -0.4, 0.8,
+                                            -0.03, -0.4, 0.8 ])
 
 
     state,r,d,_ = self.step(angles)
@@ -201,29 +265,30 @@ class Raisim_towr_anymalEnv(gym.Env):
     #base position,base orientation and joint angles from towr is considered
 
     #weights for each part
-    w_base_pos_quat = 0.15
-    w_j_a           = 0.5
-
+    w_base_pos_quat = 0.76923 
+    w_joint_angles  = 0.23076
+    #w_base_height   = -1
     #making them np arrays
     towr_pos = np.array(self.towr_traj[ith_step].base_linear)
     towr_quat = np.array(euler_to_quaternion(self.towr_traj[ith_step].base_angular))
-    
-    raisim_pos = np.array([self.current_raisim_state[0],self.current_raisim_state[1],self.current_raisim_state[2]])
-    raisim_quat = np.array([self.current_raisim_state[3],self.current_raisim_state[4],self.current_raisim_state[5],self.current_raisim_state[6]])
-    
+    towr_joint_angles = np.array(pybullet_ik(towr_pos,towr_quat, self.towr_traj[ith_step].ee_linear[0:3],
+                                                        self.towr_traj[ith_step].ee_linear[3:6],
+                                                        self.towr_traj[ith_step].ee_linear[6:9],
+                                                        self.towr_traj[ith_step].ee_linear[9:12]))
+
+    raisim_pos = np.array(self.current_raisim_state[0:3])
+    raisim_quat = np.array(self.current_raisim_state[3:7])
+    raisim_joint_angles = np.array(self.current_raisim_state[7:19])
+    #raisim_base_z = raisim_pos[2] 
+
     #calculating the mse for each part 
-    pos_diff_mse = np.mean(np.square(np.subtract(towr_pos,raisim_pos)))
-    quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
-
-
-    #final rewar:-
-    reward =w_base_pos_quat*np.exp(-20*pos_diff_mse + -10*quat_diff_mse)
-
-    # print("\n\ntowr_pos_:",towr_pos,'\t',"raisim_pos_:",raisim_pos,'\n')
-    # print("towr_quat_:",towr_quat,'\t',"raisim_quat_:",raisim_quat,'\n')
-    # print("pose_mse_:",pos_diff_mse,'\t',"quat_mse_:",quat_diff_mse,"\n")
-    # print("reward_:",reward)
-
+    base_pos_diff_mse = np.mean(np.square(np.subtract(towr_pos,raisim_pos)))
+    base_quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
+    joint_angle_diff_mse = np.square(np.subtract(towr_joint_angles,raisim_joint_angles))
+    joint_angle_diff_mse = np.mean(joint_angle_diff_mse[0:3])+np.mean(joint_angle_diff_mse[3:6])+np.mean(joint_angle_diff_mse[6:9])+np.mean(joint_angle_diff_mse[9:12])
+    #height_penalty = -1 if raisim_base_z < 0.52 else 0 
+    #final reward:-        
+    reward = w_base_pos_quat*np.exp(-20*base_pos_diff_mse + -10*base_quat_diff_mse)+ w_joint_angles* np.exp(-5*joint_angle_diff_mse)
     return reward
 
 
