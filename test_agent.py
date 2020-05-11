@@ -34,7 +34,7 @@ for i_episode in range(5):
 	print('\n\nEPISODE_:',i_episode)
 	state = env.reset()
 
-	#time.sleep(2)
+	time.sleep(10)
 	r = 0
 
 	for t in range(no_of_steps_per_epi):

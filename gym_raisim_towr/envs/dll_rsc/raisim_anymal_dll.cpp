@@ -110,8 +110,12 @@ extern "C"{
 void _init_anymal(float base_initial_height = base_initial_height_def)
 {
 
-  anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4,
-                                        -0.8, -0.03, 0.4, -0.8, 0.03, -0.4, 0.8, -0.03, -0.4, 0.8});
+  anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 1.0, 0.0, 0.0, 0.0, 
+
+-0.13535572325766684, 0.9743811894650634, -1.332805236697449, 
+ 0.1353557332372563, 0.9743812194285772, -1.3328052761745393, 
+-0.13535573056942238, -0.9743812218456691, 1.3328052791030047, 
+ 0.13535572529984888, -0.9743811832125653, 1.3328052297175719});
 
 
 Eigen::VectorXd jointPgain(anymal->getDOF()), jointDgain(anymal->getDOF()),jointVelocityTarget(anymal->getDOF());
@@ -136,12 +140,12 @@ extern "C"{
 void _rst(float base_initial_height = base_initial_height_def)
 {
 
- anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 
-                                   1.0, 0.0, 0.0, 0.0, 
-                                   0.03, 0.4,-0.8, 
-                                  -0.03, 0.4, -0.8, 
-                                   0.03, -0.4, 0.8, 
-                                  -0.03, -0.4, 0.8});
+ anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 1.0, 0.0, 0.0, 0.0, 
+
+-0.13535572325766684, 0.9743811894650634, -1.332805236697449, 
+ 0.1353557332372563, 0.9743812194285772, -1.3328052761745393, 
+-0.13535573056942238, -0.9743812218456691, 1.3328052791030047, 
+ 0.13535572529984888, -0.9743811832125653, 1.3328052297175719});
   // world.integrate1();
   // world.integrate2();
 }}

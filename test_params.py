@@ -3,8 +3,8 @@ no_of_steps_per_epi = 100
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position
 target = [2,0,0.54]
-base_init_height = 0.56
-agent_name = 'Test-7'
+base_init_height = 0.42
+agent_name = 'Test-9'
 
 '''
 10/5/20
@@ -90,13 +90,28 @@ Test - 7:
 genralized_joint_velocities[12],genralized_joint_forces[12],
 goal_base_quat(t+1)[4],goal_joint_angles(t+1)[12]]
 
+
+11/5/20
+
 TESTS FOR after fixing abduction motors
+
+changes:- 
+
+*the proper angle limits in sync with the towr 
+kinematic model has been updated, normalization formulae
+has been changed accordingly.
+*stance position changed according to towr
+
+* ik solver fixed with a error of +- 0.145 radaians
+
+
+
 Fixed Params:
 -------------
 *no_of_episodes = 5000 
 *no_of_steps_per_epi = 100
 *target = [2,0,0.54]
-*base_init_height = 0.56
+*base_init_height = 0.42
 *Hyper params according to levine
 *1 action update per 4 simulation steps
 
@@ -106,12 +121,19 @@ Fixed Params:
 *Reward Fucnction =  0.76923(Base pos + quat weighted exponential) 
                     +0.23076(joint angles weighted exponential)
 
-* joint limit = 0.39 
+
+* joint limit = ul and ll arrays according to towr
+
 Test param-fine tuning:
 -----------------------
 Test - 8:
+* with the above changes 
+Reward Fucnction = Base pos + quat exponential term alone
 
-
+Test - 9:
+* with the above changes 
+Reward Fucnction =  0.76923(Base pos + quat weighted exponential) 
+                    +0.23076(joint angles weighted exponential)
 
 
 
