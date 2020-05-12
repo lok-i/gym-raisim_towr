@@ -6,6 +6,7 @@ from gym.utils import seeding
 from ctypes import *
 import random
 import pybullet as p
+import time
 cwd_path = os.getcwd()
 '''
 * in raisim the real value is in the first and py bullet its in the last
@@ -83,16 +84,16 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.joint_w_limit = 100
     self.joint_tau_limit = 100
     # joint limits according to the kinematic box in towr
-    self.joint_angle_ul =[ 0.1331395 ,1.68423158,-0.38000404,
-                           0.49791087,1.68423119,-0.38000466,
-                           0.13313961,-0.12118592,1.67963936, 
-                           0.49791083,-0.12118621,1.67963958]
+    # self.joint_angle_ul =[ 0.1331395 ,1.68423158,-0.38000404,
+    #                        0.49791087,1.68423119,-0.38000466,
+    #                        0.13313961,-0.12118592,1.67963936, 
+    #                        0.49791083,-0.12118621,1.67963958]
    
-    self.joint_angle_ll =[-0.49791066,0.12118728,-1.67963886,
-                          -0.13313934,0.12118650,-1.67963938,
-                          -0.4979109,-1.68423165,0.38000445, 
-                          -0.13313932,-1.68423096,0.3800044 ]
-
+    # self.joint_angle_ll =[-0.49791066,0.12118728,-1.67963886,
+    #                       -0.13313934,0.12118650,-1.67963938,
+    #                       -0.4979109,-1.68423165,0.38000445, 
+    #                       -0.13313932,-1.68423096,0.3800044 ]
+    self.joint_angle_limit = np.pi/2.0
     
     
     #data type to take care of handling arrays from the c dll's
@@ -150,9 +151,8 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.raisim_dll._init_ViSsetup.argtypes = [c_bool]
     self.raisim_dll.get_state.restype = None
     self.raisim_dll.get_state.argtype = [c_float*43]
-
- 
-
+    self.raisim_dll.visualize_pose.restype = None
+    self.raisim_dll.visualize_pose.argtype = [c_float*3,c_float*4,c_float*3,c_float*3,c_float*3,c_float*3]
 
 
   def _init_towr_dll(self):
@@ -160,37 +160,42 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.towr_dll.Trajectory.restype = None
     self.towr_dll.Trajectory.argtypes = [ Trajectory_data*(self.no_of_steps +1 ) ,c_float ,c_float*3,c_int]
 
+
+  def render_towr_prediction(self):
+  	leg_1 = self.c_Float_3()
+  	leg_2 = self.c_Float_3()
+  	leg_3 = self.c_Float_3()
+  	leg_4 = self.c_Float_3()
+  	towr_quate = (c_float*4)() 
+
+  	for i in range(self.no_of_steps+1):
+  		for j in range(3):
+  			leg_1[j] = self.towr_joint_angles[i][j]
+  			leg_2[j] = self.towr_joint_angles[i][j+3]
+  			leg_3[j] = self.towr_joint_angles[i][j+6]
+  			leg_4[j] = self.towr_joint_angles[i][j+9]
+  		dummy = euler_to_quaternion(self.towr_traj[i].base_angular)
+  		for j in range(4):
+  			towr_quate[j] = dummy[j]
+
+  		# print("\nrpy(radians):\n",self.towr_traj[i].base_angular[0:4],
+  		# 	  "\nquaternion predicted:\n",euler_to_quaternion(self.towr_traj[i].base_angular))
+  		self.raisim_dll.visualize_pose(self.towr_traj[i].base_linear,towr_quate,
+  			                           leg_1,leg_2,leg_3,leg_4)
+  		time.sleep(0.2)
 #to print the entire towr traj
   def print_towr_traj(self):
     for i in range(self.no_of_steps +1 ):
-      print("i :",i," time :",i*2.0/self.no_of_steps)
+      print("\ntime_step :",i)
       print("base_linear:",self.towr_traj[i].base_linear[0],"\t",self.towr_traj[i].base_linear[1],"\t",self.towr_traj[i].base_linear[2])
-      print("base_angular:",self.towr_traj[i].base_angular[0],"\t",self.towr_traj[i].base_angular[1],"\t",self.towr_traj[i].base_angular[2])
+      print("base_angular(rasians):",self.towr_traj[i].base_angular[0],"\t",self.towr_traj[i].base_angular[1],"\t",self.towr_traj[i].base_angular[2])
       for j in range(4):
         print("leg_no:",j)
-        print("ee_linear_leg:",self.towr_traj[i].ee_linear[0+3*j],"\t",self.towr_traj[i].ee_linear[1+3*j],"\t",self.towr_traj[i].ee_linear[2+3*j])
-        print("ee_force_leg:", self.towr_traj[i].ee_force[0+3*j],"\t",self.towr_traj[i].ee_force[1+3*j],"\t",self.towr_traj[i].ee_force[2+3*j])
+        print("\tee_linear_leg:",self.towr_traj[i].ee_linear[0+3*j],"\t",self.towr_traj[i].ee_linear[1+3*j],"\t",self.towr_traj[i].ee_linear[2+3*j])
+        print("\tee_force_leg:", self.towr_traj[i].ee_force[0+3*j],"\t",self.towr_traj[i].ee_force[1+3*j],"\t",self.towr_traj[i].ee_force[2+3*j])
 
 
-  def scale_action_angle(self,input_array,action_to_angle = True):
-    output = [0,0,0,
-              0,0,0,
-              0,0,0,
-              0,0,0]
 
-    for i in range(12):
-        ll_plus_ul  = self.joint_angle_ll[i]+self.joint_angle_ul[i]
-        ll_minus_ul = self.joint_angle_ll[i]-self.joint_angle_ul[i]
-        
-        if(action_to_angle):
-            #output - angle,input - action
-            output[i] = (ll_plus_ul - (ll_minus_ul*input_array[i]))*0.5
-    
-        else:
-            #output - action,input - angle
-            output[i] = (ll_plus_ul - (2.0*input_array[i]))/ll_minus_ul
-    
-    return output
 
   def step(self, action):
     #action is 4x3 angles
@@ -199,8 +204,8 @@ class Raisim_towr_anymalEnv(gym.Env):
     
 
     #convert action to angles
-    action = self.scale_action_angle(action,action_to_angle = True)
-    
+    #action = self.scale_action_angle(action,action_to_angle = True)
+    action = self.joint_angle_limit*np.array(action)
     target_angle = (c_float*12)()
     
 
@@ -209,11 +214,11 @@ class Raisim_towr_anymalEnv(gym.Env):
     
     # every action update happens after 5 raisim_simulation steps
     # cant find the optimal value though
-    for i in range(5):
+    #for i in range(5):
     #target angle - send pd targets 
-        self.raisim_dll._sim(target_angle,self.render_status)
+    self.raisim_dll._sim(target_angle,self.render_status)
     #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
-        self.raisim_dll.get_state(self.current_raisim_state)
+    self.raisim_dll.get_state(self.current_raisim_state)
     '''
     State Space to agent:-
     [base_quat[4],genralized_joint_angles[12],genralized_joint_velocities[12],genralized_joint_forces[12],
@@ -231,10 +236,10 @@ class Raisim_towr_anymalEnv(gym.Env):
       #current_base_quaternions
       state[0:4] =  self.current_raisim_state[3:7]
       #current_joint_angles
-      state[4:16] = self.scale_action_angle(self.current_raisim_state[7:19],action_to_angle =False)
+      state[4:16] = [x * (1/self.joint_angle_limit) for x in self.current_raisim_state[7:19]]#self.scale_action_angle(self.current_raisim_state[7:19],action_to_angle =False)
       #current_joint_wel_and_torques
       for i in range(24):
-        state[i+16]=self.current_raisim_state[i+19] #skips the base co ordinates
+        state[i+16]=self.current_raisim_state[i+19] #skips the base co and quat
         if(i<12):
             if(state[i]>self.joint_w_limit): #clip_joint_velocity
                 state[i] =self.joint_w_limit
@@ -273,8 +278,8 @@ class Raisim_towr_anymalEnv(gym.Env):
                              -0.13535573056942238, -0.9743812218456691, 1.3328052791030047, 
                               0.13535572529984888, -0.9743811832125653, 1.3328052297175719]
 
-    nominal_stance_action= self.scale_action_angle(nominal_stance_angles,action_to_angle = False)
-
+   #nominal_stance_action= self.scale_action_angle(nominal_stance_angles,action_to_angle = False)
+    nominal_stance_action = [x * (1/self.joint_angle_limit) for x in nominal_stance_angles]
     
     state,r,d,_ = self.step(nominal_stance_action)
     return state
@@ -327,4 +332,31 @@ class Raisim_towr_anymalEnv(gym.Env):
          w_base_rpy *r_base_rpy(t) +
          w_base_angulat_vel * r_base_angulat_vel
       
-    '''
+    
+
+
+
+ 	
+ function to normalize within a given upper limit and lower limit values
+
+   def scale_action_angle(self,input_array,action_to_angle = True):
+    output = [0,0,0,
+              0,0,0,
+              0,0,0,
+              0,0,0]
+
+    for i in range(12):
+        ll_plus_ul  = self.joint_angle_ll[i]+self.joint_angle_ul[i]
+        ll_minus_ul = self.joint_angle_ll[i]-self.joint_angle_ul[i]
+        
+        if(action_to_angle):
+            #output - angle,input - action
+            output[i] = (ll_plus_ul - (ll_minus_ul*input_array[i]))*0.5
+    
+        else:
+            #output - action,input - angle
+            output[i] = (ll_plus_ul - (2.0*input_array[i]))/ll_minus_ul
+    
+    return output
+
+ 	'''

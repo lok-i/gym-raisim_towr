@@ -3,8 +3,8 @@ no_of_steps_per_epi = 100
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position
 target = [2,0,0.54]
-base_init_height = 0.42
-agent_name = 'Test-9'
+base_init_height = 0.56
+agent_name = 'Test-12'
 
 '''
 10/5/20
@@ -134,6 +134,44 @@ Test - 9:
 * with the above changes 
 Reward Fucnction =  0.76923(Base pos + quat weighted exponential) 
                     +0.23076(joint angles weighted exponential)
+
+12/5/20
+
+* ALL THAT HAPPEND UNTIL NOW IS SCRAP AS THE BASE ANGLE WERE IN DEGREE WHEN U THOUGHT IT WAS IS IN RADIANS !!
+
+* Towr traj looks pretty decent and realistic upon visualization (as in viz), but moon walks in simulation.
+
+Fixed Params:
+-------------
+*no_of_episodes = 5000 
+*no_of_steps_per_epi = 100
+*target = [2,0,0.54]
+*base_init_height = 0.56
+*Hyper params according to levine
+*1 action update per 4 simulation steps
+
+
+*Action Space :
+12 joint angles ,3 per leg (pd targets)
+*Reward Fucnction =  0.76923(Base pos + quat weighted exponential) 
+                    +0.23076(joint angles weighted exponential)
+
+
+* joint limit = -1.57 to +1.57 
+*State Space : 
+[base_quat[4],genralized_joint_angles[12],
+genralized_joint_velocities[12],genralized_joint_forces[12],
+goal_base_quat(t+1)[4] ]
+
+Test - 10 : nothing gud
+
+Test - 11 : nothing gud 
+*1M steps
+
+Test - 12 :
+*Abduction angles fixed
+* 8 simulation steps per learning update
+
 
 
 

@@ -150,6 +150,12 @@ void _rst(float base_initial_height = base_initial_height_def)
   // world.integrate2();
 }}
 
+
+
+
+
+
+
 void controller_1(float angles[12])
 {//to take random samples
   std::default_random_engine generator;
@@ -331,3 +337,23 @@ void _sim(float angles[12],bool render = true)
           }
 }}
 
+extern "C"{
+
+void visualize_pose(float base_pos[3],float base_quat[4],float angle_LF[3],float angle_RF[3],float angle_LH[3],float angle_RH[3])
+{
+
+
+anymal->setGeneralizedCoordinate({base_pos[0],base_pos[1],base_pos[2],
+	                              base_quat[0],base_quat[1],base_quat[2],base_quat[3],
+	                              angle_LF[0],angle_LF[1],angle_LF[2],
+	                              angle_RF[0],angle_RF[1],angle_RF[2],
+	                              angle_LH[0],angle_LH[1],angle_LH[2],
+	                              angle_RH[0],angle_RH[1],angle_RH[2]});
+
+  world.integrate1();
+  world.integrate2();
+ _render();
+}
+
+
+}

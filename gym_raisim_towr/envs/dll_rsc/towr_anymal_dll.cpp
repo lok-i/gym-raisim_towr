@@ -173,7 +173,8 @@ int i =0;
       t=2;
     //base angles to radian
     Eigen::Vector3d rad = solution.base_angular_->GetPoint(t).p();
-    rad =  rad/M_PI*180;
+    //if required to degree conversion from radian
+    //rad =  rad/M_PI*180;
 
     for(int j=0;j<3;j++)
         {    

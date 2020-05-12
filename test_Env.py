@@ -15,7 +15,7 @@ from ctypes import *
 # thus only x and y matter of the final base position
 
 no_of_steps = 100
-base_init_height = 0.42
+base_init_height = 0.56
 target = [2,0,0.42]
 
 '''
@@ -150,28 +150,19 @@ def test_env():
 		print('State:\n',state)
 		for i in range(no_of_steps):
 			sleep(0.01)
-			
-			action = env.action_space.sample()
+			#action = env.action_space.sample()
+			action =[x * (2/np.pi) for x in env.towr_joint_angles[i]]
 			#print("Action:",action)
 			state,reward,done,_ = env.step(action)
 			print('State:\n',state,"\n")
 			print('Reward:\n',reward,"\n")
-			print('done:\n',done,"\n")
+			#print('done:\n',done,"\n")
 		
 	env.close()
 
 test_env()
-#env.print_towr_traj()
-#plot_towr_anymal_animate()
 
+#env.reset()
+#sleep(5)
+#env.render_towr_prediction()
 
-def stardize(a):
-	a= (a-np.mean(a))/np.std(a)
-	return a
-
-	'''
-function that converts angles to action and vice versa      
-*since both action space and observation space span from
--1 to 1,this function is also use to normalize the state 
-space input
-'''
