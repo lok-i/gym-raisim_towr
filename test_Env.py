@@ -43,7 +43,7 @@ def plot_towr():
 
 
 '''
-towr trajectory plot for monoped env
+towr trajectory plot for anymal env
 '''
 def plot_towr_anymal():
 	fig = plt.figure()
@@ -83,7 +83,7 @@ def plot_towr_anymal():
 	
 '''
 this function shows the live tracking of towr predicted
-co ordinates
+co ordinates for anymal
 '''
 def plot_towr_anymal_animate():
 	fig = plt.figure()
@@ -135,8 +135,8 @@ env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',
 
 
 
-print('action_space:',env.action_space)
-print('state_space:',env.observation_space)
+print('env_action_space:',env.action_space)
+print('env_state_space:',env.observation_space)
 
 
 
@@ -144,25 +144,25 @@ def test_env():
 	for i_episode in range(5):
 		print('\n\nEPISODE_:',i_episode)
 		state = env.reset()
-		#print('State:\n',state)
+		
 		env.render()
 		sleep(1)
-		print('State:\n',state)
+		#print('State:\n',state)
 		for i in range(no_of_steps):
 			sleep(0.01)
 			#action = env.action_space.sample()
 			action =[x * (2/np.pi) for x in env.towr_joint_angles[i]]
 			#print("Action:",action)
 			state,reward,done,_ = env.step(action)
-			print('State:\n',state,"\n")
-			print('Reward:\n',reward,"\n")
+			#print('State:\n',state,"\n")
+			#print('Reward:\n',reward,"\n")
 			#print('done:\n',done,"\n")
 		
 	env.close()
 
 test_env()
 
-#env.reset()
-#sleep(5)
-#env.render_towr_prediction()
+# env.reset()
+# sleep(20)
+# env.render_towr_prediction()
 

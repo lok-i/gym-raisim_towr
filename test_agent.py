@@ -23,13 +23,13 @@ env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',
 
 #check_env(env, warn=True)
 
-#function to print traj calcuated by towr
-#env.print_towr_traj()
+print('env_action_space:',env.action_space)
+print('env_state_space:',env.observation_space)
 
-print('action_space:',env.action_space)
-print('state_space:',env.observation_space)
 model = PPO2.load(cwd+'/models/'+agent_name+'.zip')
 
+
+# no of episodes to test
 for i_episode in range(5):
 	print('\n\nEPISODE_:',i_episode)
 	state = env.reset()
@@ -52,6 +52,6 @@ for i_episode in range(5):
 		# print('State:\n',state)
 		# print('Reward:\n',reward)
 		# print('done:\n',done)
-	print('Reward_sum:',r)
+	print('Reward_sum_over_the_episode:',r)
 		
 env.close()

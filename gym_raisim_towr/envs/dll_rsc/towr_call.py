@@ -1,3 +1,10 @@
+'''
+file to test the functions
+in towr dll created
+'''
+
+
+
 from ctypes import *
 
 lib = CDLL("./build/libtowr_anymal_dll.so")

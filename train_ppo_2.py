@@ -5,11 +5,10 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines import PPO2
 from test_params import *
+
+
+
 cwd = os.getcwd()
-
-
-
-
 '''
 model name ,target,no of epidodes,
 no of steps are all defined in
@@ -39,9 +38,3 @@ model.learn(total_timesteps=no_of_episodes*no_of_steps_per_epi,
 model.save(save_path=cwd+'/models/'+agent_name+'.zip')
 
 
-	
-
-	# for i in range(2):
-	# print("Test for angle limit:",(i+1)*0.3)
-	# train_for_test('dummy',(i+1)*0.3)
-	# env.close()

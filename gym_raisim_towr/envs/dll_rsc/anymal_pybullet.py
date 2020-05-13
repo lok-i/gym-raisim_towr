@@ -1,3 +1,12 @@
+'''
+test file for checking functions
+and values in realtion to 
+pybullet 
+'''
+
+
+
+
 import pybullet as p
 import os
 import time

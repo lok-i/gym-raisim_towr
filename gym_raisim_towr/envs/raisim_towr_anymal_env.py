@@ -119,6 +119,12 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.towr_dll.Trajectory(self.towr_traj,c_float(self.base_init_height),self.base_linear_target,c_int(self.no_of_steps))    
     #list to keep the joint angles for the corresponding towr predicted ee_cordinates
     self.towr_joint_angles = []
+    '''
+    towr_joint_angles[i] = [LF_ABDUCTION,LF_HIP,LF_KNEE,
+    						RF_ABDUCTION,RF_HIP,RF_KNEE,
+    						LH_ABDUCTION,LH_HIP,LH_KNEE,
+    						RH_ABDUCTION,RH_HIP,RH_KNEE,]
+    '''
     for i in range(len(self.towr_traj)):
         towr_quat = euler_to_quaternion(self.towr_traj[i].base_angular)
         self.towr_joint_angles.append(list(pybullet_ik(self.towr_traj[i].base_linear, towr_quat,
@@ -178,11 +184,9 @@ class Raisim_towr_anymalEnv(gym.Env):
   		for j in range(4):
   			towr_quate[j] = dummy[j]
 
-  		# print("\nrpy(radians):\n",self.towr_traj[i].base_angular[0:4],
-  		# 	  "\nquaternion predicted:\n",euler_to_quaternion(self.towr_traj[i].base_angular))
   		self.raisim_dll.visualize_pose(self.towr_traj[i].base_linear,towr_quate,
   			                           leg_1,leg_2,leg_3,leg_4)
-  		time.sleep(0.2)
+  		time.sleep(0.01)
 #to print the entire towr traj
   def print_towr_traj(self):
     for i in range(self.no_of_steps +1 ):
@@ -204,7 +208,6 @@ class Raisim_towr_anymalEnv(gym.Env):
     
 
     #convert action to angles
-    #action = self.scale_action_angle(action,action_to_angle = True)
     action = self.joint_angle_limit*np.array(action)
     target_angle = (c_float*12)()
     
@@ -212,9 +215,8 @@ class Raisim_towr_anymalEnv(gym.Env):
     for i in range(12):
       target_angle[i] = action[i]
     
-    # every action update happens after 5 raisim_simulation steps
-    # cant find the optimal value though
-    #for i in range(5):
+
+    #for i in range(1):
     #target angle - send pd targets 
     self.raisim_dll._sim(target_angle,self.render_status)
     #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
@@ -307,8 +309,8 @@ class Raisim_towr_anymalEnv(gym.Env):
     joint_angle_diff_mse = np.square(np.subtract(towr_joint_angles,raisim_joint_angles))
     joint_angle_diff_mse = np.mean(joint_angle_diff_mse[0:3])+np.mean(joint_angle_diff_mse[3:6])+np.mean(joint_angle_diff_mse[6:9])+np.mean(joint_angle_diff_mse[9:12])
     #height_penalty = -1 if raisim_base_z < 0.52 else 0 
-    #final reward:-        
     
+    #final reward:-        
     reward = w_base_pos_quat*np.exp(-20*base_pos_diff_mse + -10*base_quat_diff_mse)+ w_joint_angles* np.exp(-5*joint_angle_diff_mse)
     return reward
 

@@ -1,3 +1,9 @@
+'''
+file to test the functions
+in raisim dll created
+'''
+
+
 from ctypes import *
 import random
 import numpy as np
