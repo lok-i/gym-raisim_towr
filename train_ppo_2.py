@@ -17,14 +17,14 @@ test_params.py file
 
 env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',render=False,
 				base_linear_target=target,no_of_steps=no_of_steps_per_epi,
-				base_init_height = base_init_height)
+				base_init_pos = base_init_pos)
 env = DummyVecEnv([lambda: env]) 
 
 
 model = PPO2(MlpPolicy,
 			 env,
 			 gamma=0.95,
-			 learning_rate = 0.00001,
+			 learning_rate = 0.000001,
 			 n_steps=no_of_steps_per_epi,
 			 noptepochs=10,
 			 nminibatches=5,

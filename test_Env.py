@@ -14,9 +14,9 @@ from ctypes import *
 # independent of last z axis as it will be towr depended 
 # thus only x and y matter of the final base position
 
-no_of_steps = 100
-base_init_height = 0.56
-target = [2,0,0.42]
+no_of_steps = 200
+base_init_pos = [-2,-1,0.54]
+target = [2,0,0.54]
 
 '''
 towr trajectory plot for monoped env
@@ -130,7 +130,7 @@ env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',
 				render=True,
 				base_linear_target=target,
 				no_of_steps=no_of_steps,
-				base_init_height = base_init_height,
+				base_init_pos = base_init_pos,
 				gravity = True)
 
 
@@ -147,20 +147,24 @@ def test_env():
 		
 		env.render()
 		sleep(1)
-		#print('State:\n',state)
+		print('State:\n',state)
 		for i in range(no_of_steps):
 			sleep(0.01)
 			#action = env.action_space.sample()
-			action =[x * (2/np.pi) for x in env.towr_joint_angles[i]]
+			action =[x for x in env.towr_joint_angles[i]]
 			#print("Action:",action)
 			state,reward,done,_ = env.step(action)
-			#print('State:\n',state,"\n")
-			#print('Reward:\n',reward,"\n")
-			#print('done:\n',done,"\n")
+			print('State:\n',state,"\n")
+			print('Reward:\n',reward,"\n")
+			print('done:\n',done,"\n")
+			if done:
+				break
 		
 	env.close()
 
 test_env()
+
+
 
 # env.reset()
 # sleep(20)

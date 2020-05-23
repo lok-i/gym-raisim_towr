@@ -64,11 +64,11 @@ class Trajectory_data(Structure):
 class Raisim_towr_anymalEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
-  def __init__(self,base_linear_target,base_init_height = 0.54,render=True,no_of_steps=20,gravity=True):
+  def __init__(self,base_linear_target,base_init_pos,render=True,no_of_steps=20,gravity=True):
     # also the no of sampled from towr initially == no of steps per episode
     self.no_of_steps = no_of_steps 
     self.render_status = render
-    self.base_init_height = base_init_height
+    self.base_init_pos = base_init_pos
     '''
     ith_step - keeps count of the index of the towr traj 
     that needs to be compared with the curret step of raisim
@@ -76,7 +76,7 @@ class Raisim_towr_anymalEnv(gym.Env):
     goal state in the state space and gets reset once the episode 
     ends ie when ithstep == no_of_steps
     '''
-    self.action_space = spaces.Box(low=-1.0, high=1.0,shape=(12,))
+    self.action_space = spaces.Box(low=-1.0, high=1.0,shape=(8,))
     self.observation_space = spaces.Box(low=-1.0, high=1.0,shape=(44,))
     self.ith_step = -1
 
@@ -84,15 +84,16 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.joint_w_limit = 100
     self.joint_tau_limit = 100
     # joint limits according to the kinematic box in towr
-    # self.joint_angle_ul =[ 0.1331395 ,1.68423158,-0.38000404,
-    #                        0.49791087,1.68423119,-0.38000466,
-    #                        0.13313961,-0.12118592,1.67963936, 
-    #                        0.49791083,-0.12118621,1.67963958]
+    self.joint_angle_ul =[ 0.1331395 ,1,-0.8,
+                           0.49791087,1,-0.8,
+                           0.13313961,-0.5,1.4, 
+                           0.49791083,-0.5,1.4]
    
-    # self.joint_angle_ll =[-0.49791066,0.12118728,-1.67963886,
-    #                       -0.13313934,0.12118650,-1.67963938,
-    #                       -0.4979109,-1.68423165,0.38000445, 
-    #                       -0.13313932,-1.68423096,0.3800044 ]
+    self.joint_angle_ll =[-0.49791066,0.5,-1.4,
+                          -0.13313934,0.5,-1.4,
+                          -0.4979109,-1,0.8, 
+                          -0.13313932,-1,0.8 ]
+
     self.joint_angle_limit = np.pi/2.0
     
     
@@ -116,7 +117,10 @@ class Raisim_towr_anymalEnv(gym.Env):
     self._init_towr_dll()
     
     #function calls,to calculate towr trajectory
-    self.towr_dll.Trajectory(self.towr_traj,c_float(self.base_init_height),self.base_linear_target,c_int(self.no_of_steps))    
+    ini_b_dummy = self.c_Float_3()
+    for i in range(3):
+      ini_b_dummy[i] = self.base_init_pos[i]
+    self.towr_dll.Trajectory(self.towr_traj,ini_b_dummy,self.base_linear_target,c_int(self.no_of_steps))    
     #list to keep the joint angles for the corresponding towr predicted ee_cordinates
     self.towr_joint_angles = []
     '''
@@ -136,7 +140,7 @@ class Raisim_towr_anymalEnv(gym.Env):
   
     #function calls,to initialize visual and world elements in raisim
     self.raisim_dll._init_ViSsetup(c_bool(gravity))
-    self.raisim_dll._init_anymal(c_float(self.base_init_height))
+    self.raisim_dll._init_anymal(ini_b_dummy)
 
 
     
@@ -150,9 +154,9 @@ class Raisim_towr_anymalEnv(gym.Env):
     self.raisim_dll._sim.restype = None
     self.raisim_dll._sim.argtypes = [c_float*12,c_bool]# 12 angles
     self.raisim_dll._rst.restype = None
-    self.raisim_dll._rst.argtypes = [c_float]
+    self.raisim_dll._rst.argtypes = [c_float*3]
     self.raisim_dll._init_anymal.restype = None
-    self.raisim_dll._init_anymal.argtypes = [c_float]
+    self.raisim_dll._init_anymal.argtypes = [c_float*3]
     self.raisim_dll._init_ViSsetup.restype = None
     self.raisim_dll._init_ViSsetup.argtypes = [c_bool]
     self.raisim_dll.get_state.restype = None
@@ -164,7 +168,31 @@ class Raisim_towr_anymalEnv(gym.Env):
   def _init_towr_dll(self):
     self.towr_dll = CDLL(cwd_path+"/gym_raisim_towr/envs/dll_rsc/build/libtowr_anymal_dll.so")
     self.towr_dll.Trajectory.restype = None
-    self.towr_dll.Trajectory.argtypes = [ Trajectory_data*(self.no_of_steps +1 ) ,c_float ,c_float*3,c_int]
+    self.towr_dll.Trajectory.argtypes = [ Trajectory_data*(self.no_of_steps +1 ) ,c_float*3 ,c_float*3,c_int]
+
+
+  def scale_action_angle(self,input_array,action_to_angle = True):
+    output = [0,0,0,
+              0,0,0,
+              0,0,0,
+              0,0,0]
+
+    for i in range(12):
+        ll_plus_ul  = self.joint_angle_ll[i]+self.joint_angle_ul[i]
+        ll_minus_ul = self.joint_angle_ll[i]-self.joint_angle_ul[i]
+        
+        if(action_to_angle):
+            #output - angle,input - action
+            output[i] = (ll_plus_ul - (ll_minus_ul*input_array[i]))*0.5
+    
+        else:
+            #output - action,input - angle
+            output[i] = (ll_plus_ul - (2.0*input_array[i]))/ll_minus_ul
+    
+    return output
+
+
+
 
 
   def render_towr_prediction(self):
@@ -208,19 +236,25 @@ class Raisim_towr_anymalEnv(gym.Env):
     
 
     #convert action to angles
-    action = self.joint_angle_limit*np.array(action)
+    #action = self.joint_angle_limit*np.array(action)
+    action = [0.1490526735381325,action[0],action[1],
+             -0.14905321642391564,action[2],action[3],
+              0.1490527737013559,action[4],action[5],
+             -0.14905322405882046,action[6],action[7]]
+    action = self.scale_action_angle(action,action_to_angle = True)
     target_angle = (c_float*12)()
     
 
     for i in range(12):
       target_angle[i] = action[i]
-    
+    #for i in range(8):
 
-    #for i in range(1):
+    for i in range(5):
     #target angle - send pd targets 
-    self.raisim_dll._sim(target_angle,self.render_status)
+      
+      self.raisim_dll._sim(target_angle,self.render_status)
     #saves root_linear,root_qaut,joint_angles,joint_velocities,joint_torques from raisim
-    self.raisim_dll.get_state(self.current_raisim_state)
+      self.raisim_dll.get_state(self.current_raisim_state)
     '''
     State Space to agent:-
     [base_quat[4],genralized_joint_angles[12],genralized_joint_velocities[12],genralized_joint_forces[12],
@@ -228,7 +262,7 @@ class Raisim_towr_anymalEnv(gym.Env):
     '''
     state = np.zeros(44)
   
-    if self.ith_step ==self.no_of_steps:
+    if self.ith_step ==self.no_of_steps or self.current_raisim_state[2] < 0.3:
       done = True
 
     #Clipping and Normalizing the state space and initializing
@@ -238,7 +272,8 @@ class Raisim_towr_anymalEnv(gym.Env):
       #current_base_quaternions
       state[0:4] =  self.current_raisim_state[3:7]
       #current_joint_angles
-      state[4:16] = [x * (1/self.joint_angle_limit) for x in self.current_raisim_state[7:19]]#self.scale_action_angle(self.current_raisim_state[7:19],action_to_angle =False)
+      state[4:16] = self.scale_action_angle(self.current_raisim_state[7:19],action_to_angle =False)
+      #[x * (1/self.joint_angle_limit) for x in self.current_raisim_state[7:19]]#self.scale_action_angle(self.current_raisim_state[7:19],action_to_angle =False)
       #current_joint_wel_and_torques
       for i in range(24):
         state[i+16]=self.current_raisim_state[i+19] #skips the base co and quat
@@ -263,7 +298,9 @@ class Raisim_towr_anymalEnv(gym.Env):
     
   def reset(self):
     #b_h - the bot will be rest at 0,0,b_h with the default stance joint angles
-    b_h = c_float(self.base_init_height)
+    b_h = self.c_Float_3()
+    for i in range(3):
+      b_h[i] = self.base_init_pos[i]
     print('reset')
     
     #reset ithstep
@@ -280,9 +317,10 @@ class Raisim_towr_anymalEnv(gym.Env):
                              -0.13535573056942238, -0.9743812218456691, 1.3328052791030047, 
                               0.13535572529984888, -0.9743811832125653, 1.3328052297175719]
 
-   #nominal_stance_action= self.scale_action_angle(nominal_stance_angles,action_to_angle = False)
-    nominal_stance_action = [x * (1/self.joint_angle_limit) for x in nominal_stance_angles]
-    
+    nominal_stance_action= self.scale_action_angle(nominal_stance_angles,action_to_angle = False)
+   # nominal_stance_action = [x * (1/self.joint_angle_limit) for x in nominal_stance_angles]
+    #action = self.scale_action_angle(action,action_to_angle = True)
+    print("nominal_action:",nominal_stance_action)
     state,r,d,_ = self.step(nominal_stance_action)
     return state
     
@@ -290,7 +328,7 @@ class Raisim_towr_anymalEnv(gym.Env):
     #weights for each part
     w_base_pos_quat = 0.76923 
     w_joint_angles  = 0.23076
-    #w_base_height   = -1
+    w_base_height   = -1
     
     #making towr data as np arrays
     towr_pos = np.array(self.towr_traj[ith_step].base_linear)
@@ -301,17 +339,19 @@ class Raisim_towr_anymalEnv(gym.Env):
     raisim_pos = np.array(self.current_raisim_state[0:3])
     raisim_quat = np.array(self.current_raisim_state[3:7])
     raisim_joint_angles = np.array(self.current_raisim_state[7:19])
-    #raisim_base_z = raisim_pos[2] 
+    raisim_base_z = raisim_pos[2] 
 
     #calculating the mse for each part 
     base_pos_diff_mse = np.mean(np.square(np.subtract(towr_pos,raisim_pos)))
     base_quat_diff_mse = np.mean(np.square(np.subtract(towr_quat,raisim_quat)))
     joint_angle_diff_mse = np.square(np.subtract(towr_joint_angles,raisim_joint_angles))
-    joint_angle_diff_mse = np.mean(joint_angle_diff_mse[0:3])+np.mean(joint_angle_diff_mse[3:6])+np.mean(joint_angle_diff_mse[6:9])+np.mean(joint_angle_diff_mse[9:12])
-    #height_penalty = -1 if raisim_base_z < 0.52 else 0 
+    joint_angle_diff_mse = np.mean(joint_angle_diff_mse[1:3])+np.mean(joint_angle_diff_mse[4:6])+np.mean(joint_angle_diff_mse[7:9])+np.mean(joint_angle_diff_mse[10:12])
+                          #np.mean(joint_angle_diff_mse[0:3])+np.mean(joint_angle_diff_mse[3:6])+np.mean(joint_angle_diff_mse[6:9])+np.mean(joint_angle_diff_mse[9:12])
+    height_penalty = 1 if raisim_base_z < 0.25 else 0 
     
     #final reward:-        
-    reward = w_base_pos_quat*np.exp(-20*base_pos_diff_mse + -10*base_quat_diff_mse)+ w_joint_angles* np.exp(-5*joint_angle_diff_mse)
+    reward = w_base_pos_quat*np.exp(-20*base_pos_diff_mse + -10*base_quat_diff_mse)+ w_joint_angles* np.exp(-5*joint_angle_diff_mse)+w_base_height*height_penalty
+    
     return reward
 
 

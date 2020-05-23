@@ -19,7 +19,7 @@ env = gym.make('gym_raisim_towr:raisim_towr_anymal-v0',
 				render=True,
 				base_linear_target=target,
 				no_of_steps=no_of_steps_per_epi,
-				base_init_height = base_init_height)
+				base_init_pos = base_init_pos)
 
 #check_env(env, warn=True)
 
@@ -29,8 +29,9 @@ print('env_state_space:',env.observation_space)
 model = PPO2.load(cwd+'/models/'+agent_name+'.zip')
 
 
+
 # no of episodes to test
-for i_episode in range(5):
+for i_episode in range(50):
 	print('\n\nEPISODE_:',i_episode)
 	state = env.reset()
 

@@ -134,8 +134,10 @@ class Raisim_towrEnv(gym.Env):
      goal_base_quat(t+1)[4]]
     '''
     state = np.zeros(17)
+
+    target_reached = 1 if self.current_raisim_state[0] == self.target[0] and self.current_raisim_state[1] == self.target[1] else 0 
   
-    if self.ith_step ==self.no_of_steps:
+    if self.ith_step ==self.no_of_steps or target_reached :
       done = True
 
     #Clipping and Normalizing the state space and initializing

@@ -107,10 +107,10 @@ void _init_ViSsetup(bool gravity)
 }
 
 extern "C"{
-void _init_anymal(float base_initial_height = base_initial_height_def)
+void _init_anymal(float base_initial_pos[3])
 {
 
-  anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 1.0, 0.0, 0.0, 0.0, 
+  anymal->setGeneralizedCoordinate({base_initial_pos[0],base_initial_pos[1],base_initial_pos[2], 1.0, 0.0, 0.0, 0.0, 
 
 -0.13535572325766684, 0.9743811894650634, -1.332805236697449, 
  0.1353557332372563, 0.9743812194285772, -1.3328052761745393, 
@@ -137,10 +137,10 @@ jointDgain.tail(12).setConstant(10.0);
 }}
 
 extern "C"{
-void _rst(float base_initial_height = base_initial_height_def)
+void _rst(float base_initial_pos[3])
 {
 
- anymal->setGeneralizedCoordinate({0, 0, base_initial_height, 1.0, 0.0, 0.0, 0.0, 
+ anymal->setGeneralizedCoordinate({base_initial_pos[0], base_initial_pos[1],base_initial_pos[2], 1.0, 0.0, 0.0, 0.0, 
 
 -0.13535572325766684, 0.9743811894650634, -1.332805236697449, 
  0.1353557332372563, 0.9743812194285772, -1.3328052761745393, 
@@ -209,7 +209,11 @@ void _close()
 {
   auto vis = raisim::OgreVis::get();
   vis->closeApp();
-  _rst();
+  float base_close[3];
+  base_close[0] = 0;
+  base_close[1] = 0;
+  base_close[2] = 0.54;
+  _rst(base_close);
 }
 
 }

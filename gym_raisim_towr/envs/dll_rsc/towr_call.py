@@ -68,8 +68,8 @@ def print_traj2(a,arr_size,no_of_samples):
 
 def cal_towr_code():
 	target = float_array_3()
-	target[0] =4
-	target[1] =1
+	target[0] =2
+	target[1] =0
 	target[2] =0.54
 
 	

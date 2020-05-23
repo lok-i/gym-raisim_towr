@@ -60,7 +60,7 @@ float ee_force[12]; // 4 legs 3 componenst for each force
 
 
 
-void towr_trajectory(NlpFormulation &formulation,SplineHolder &solution,Eigen::Vector3d target,float base_height_initial,Trajectory_data* data,int no_of_samples)
+void towr_trajectory(NlpFormulation &formulation,SplineHolder &solution,Eigen::Vector3d target,Eigen::Vector3d base_initial,Trajectory_data* data,int no_of_samples)
 {
 
 
@@ -73,17 +73,24 @@ void towr_trajectory(NlpFormulation &formulation,SplineHolder &solution,Eigen::V
   formulation.model_ = RobotModel(RobotModel::Anymal);
 
   // set the initial position of the Anymal
-
-
+  //Eigen::Vector3d Ini(-2,0,0.54);
+  formulation.initial_base_.lin.at(kPos) = base_initial;//*(base_initial+0);
+  std::cout<<"\nBase_initial:\n"<<formulation.initial_base_.lin.at(kPos).x()
+                          <<"\n"<<formulation.initial_base_.lin.at(kPos).y()
+                          <<"\n"<<formulation.initial_base_.lin.at(kPos).z();
 
   auto nominal_stance_B = formulation.model_.kinematic_model_->GetNominalStanceInBase();
   double z_ground = 0.0;
   formulation.initial_ee_W_ =  nominal_stance_B;
+
   std::for_each(formulation.initial_ee_W_.begin(), formulation.initial_ee_W_.end(),
-                  [&](Eigen::Vector3d& p){ p.z() = z_ground; } // feet at 0 height
+                  [&](Eigen::Vector3d& p)
+                  {p.x() = p.x()+base_initial(0);
+                   p.y() = p.y()+base_initial(1); 
+                   p.z() = z_ground; } // feet at 0 height
      );
 
-  formulation.initial_base_.lin.at(kPos).z() = - nominal_stance_B.front().z() + z_ground;
+ //formulation.initial_base_.lin.at(kPos).z() = - nominal_stance_B.front().z() + z_ground;
    int n_ee = formulation.model_.kinematic_model_->GetNumberOfEndeffectors();
    std::cout<<"\n\nn_ee :"<<n_ee<<"\n\n";
   // define the desired goal state of the Anymal
@@ -264,23 +271,26 @@ while (t<=solution.base_linear_->GetTotalTime() + 1e-5) {
 
 extern "C"{
 
-void Trajectory(Trajectory_data* data,float i_h,float t[3],int no_of_samples)
+void Trajectory(Trajectory_data* data,float i_b[3],float t[3],int no_of_samples)
 {
   
 
    
   NlpFormulation formulation;
   SplineHolder solution;
-  Eigen::Vector3d target;
+  Eigen::Vector3d target,initial;
   //std::cout <<"\nEnter Target Co-ordinates:\n";
   
-  target(0)=t[0];
-  target(1)=t[1];
-  target(2)=t[3]; //doesnt matter coz plain terrain - always 0.54
+  
+  for(int i=0;i<3;i++)
+  {
+   target(i)=t[i];
+   initial(i)=i_b[i];
 
+  }
   
 
-  towr_trajectory(formulation,solution,target,i_h,data,no_of_samples);
+  towr_trajectory(formulation,solution,target,initial,data,no_of_samples);
 
 
 }

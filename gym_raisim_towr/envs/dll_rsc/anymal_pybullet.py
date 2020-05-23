@@ -41,7 +41,7 @@ def save_towr_angles(base_pos,base_quat,ee1,ee2,ee3,ee4):
 
 
 
-base_pos = [0,0,0.56]
+base_pos = [0,0,0.43]
 
 #p.resetBasePostionAndOrientation(bot2, [0, 0, 1], [0, 0, 0, 0.707])
 # num_of_joints = p.getNumJoints(anymal);
@@ -130,6 +130,10 @@ min_angles = np.full(12,np.inf)
 #print(max_angles)
 #print(min_angles)
 max_diff = -np.inf
+numJoints = p.getNumJoints(geo_anymal)
+for joint in range(numJoints):
+  print(p.getJointInfo(geo_anymal, joint))
+
 
 
 while(True):
@@ -144,10 +148,10 @@ while(True):
 			
 			p.resetBasePositionAndOrientation(geo_anymal, base_pos, quat)
 
-			leg_LF = p.calculateInverseKinematics(geo_anymal,5 ,eight_vertx_LF[j])
-			leg_RF = p.calculateInverseKinematics(geo_anymal,10,eight_vertx_RF[j])
-			leg_LH = p.calculateInverseKinematics(geo_anymal,15,eight_vertx_LH[j])
-			leg_RH = p.calculateInverseKinematics(geo_anymal,20,eight_vertx_RH[j])
+			leg_LF = p.calculateInverseKinematics(geo_anymal,5 ,[0.34,0.19,base_pos[2]-0.42])#eight_vertx_LF[j])
+			leg_RF = p.calculateInverseKinematics(geo_anymal,10,[0.34,-0.19,base_pos[2]-0.42])#eight_vertx_RF[j])
+			leg_LH = p.calculateInverseKinematics(geo_anymal,15,[-0.34,0.19,base_pos[2]-0.42])#eight_vertx_LH[j])
+			leg_RH = p.calculateInverseKinematics(geo_anymal,20,[-0.34,-0.19,base_pos[2]-0.42])#eight_vertx_RH[j])
 			p.setJointMotorControlArray(bodyUniqueId=geo_anymal,
                                 jointIndices = [1,2,3],
                                 controlMode=p.POSITION_CONTROL,
