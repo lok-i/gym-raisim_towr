@@ -147,7 +147,7 @@ def find_force(anymal,leg_index,f_tip,angles):
 		
 no_of_samples = 100
 float_array_3 = c_float*3
-init_base_pos = [0,0,0.5]
+init_base_pos = [-1,0,0.5]
 
 def run_towr_tracking(target_pos):
 	current_base_pos = init_base_pos
@@ -159,15 +159,16 @@ def run_towr_tracking(target_pos):
 	anymal = p.loadURDF(file_path+"anymal.urdf",[0,2,0.5])
 	vis_anymal = p.loadURDF(file_path+"anymal_vis.urdf",[0,0,0.5])
 
-	set_anymal(vis_anymal,[0,0,0.5],[0,0,0,1], [0.34,0.19,init_base_pos[2]-0.42],
-											   [0.34,-0.19,init_base_pos[2]-0.42],
-    										   [-0.34,0.19,init_base_pos[2]-0.42],
-    										   [-0.34,-0.19,init_base_pos[2]-0.42])
+	set_anymal(vis_anymal,init_base_pos,[0,0,0,1], [init_base_pos[0]+0.34,init_base_pos[1]+0.19,init_base_pos[2]-0.42],
+											       [init_base_pos[0]+0.34,init_base_pos[1]-0.19,init_base_pos[2]-0.42],
+    										       [init_base_pos[0]-0.34,init_base_pos[1]+0.19,init_base_pos[2]-0.42],
+    										       [init_base_pos[0]-0.34,init_base_pos[1]-0.19,init_base_pos[2]-0.42])
 
-	set_anymal(anymal,[0,2,0.5],[0,0,0,1], [0.34,2+0.19,init_base_pos[2]-0.42],
-											   [0.34,2-0.19,init_base_pos[2]-0.42],
-    										   [-0.34,2+0.19,init_base_pos[2]-0.42],
-    										   [-0.34,2-0.19,init_base_pos[2]-0.42])
+	set_anymal(anymal,[init_base_pos[0],init_base_pos[1]+2,init_base_pos[2]],[0,0,0,1], 
+		                                           [init_base_pos[0]+0.34,init_base_pos[1]+2+0.19,init_base_pos[2]-0.42],
+											       [init_base_pos[0]+0.34,init_base_pos[1]+2-0.19,init_base_pos[2]-0.42],
+    										       [init_base_pos[0]-0.34,init_base_pos[1]+2+0.19,init_base_pos[2]-0.42],
+    										       [init_base_pos[0]-0.34,init_base_pos[1]+2-0.19,init_base_pos[2]-0.42])
 	reached_or_out = True
 	dummy = 0
 	while(reached_or_out):
